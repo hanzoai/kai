@@ -1,0 +1,22 @@
+{
+  "model": "kai",
+  "state": {
+    "prospect": "VP Engineering at MedTech Co",
+    "history": [
+      "downloaded whitepaper on HIPAA compliance with private models",
+      "attended webinar on agent security",
+      "created free developer account and tested 50 API queries"
+    ]
+  },
+  "questions": {
+    "next_action": {
+      "type": "choice",
+      "instructions": "What is the optimal next engagement step?",
+      "criteria": {
+        "book_demo": "direct calendar link for technical demo with Solutions Architect",
+        "send_case_study": "email healthcare case study and security audit results",
+        "invite_slack": "invite to private developer Slack channel"
+      }
+    }
+  }
+}

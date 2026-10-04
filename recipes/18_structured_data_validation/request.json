@@ -1,0 +1,26 @@
+{
+  "model": "kai",
+  "state": {
+    "extracted_invoice": {
+      "vendor": "Acme Cloud Services",
+      "subtotal": 100.0,
+      "tax": 10.0,
+      "total": 125.0
+    }
+  },
+  "questions": {
+    "is_arithmetically_valid": {
+      "type": "noul",
+      "instructions": "Does the subtotal + tax exactly equal the stated total?"
+    },
+    "confidence_rating": {
+      "type": "score",
+      "instructions": "Score data extraction confidence",
+      "criteria": [
+        "unreliable / contradictory",
+        "partial confidence",
+        "fully verified"
+      ]
+    }
+  }
+}

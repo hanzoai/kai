@@ -1,0 +1,15 @@
+{
+  "model": "kai",
+  "state": {
+    "user_account_age_days": 180,
+    "monthly_active_days": 26,
+    "is_developer_tier": true,
+    "feedback_score": 4.9
+  },
+  "questions": {
+    "enroll_in_beta": {
+      "type": "noul",
+      "instructions": "Is this user a high-reliability candidate for experimental beta features?"
+    }
+  }
+}

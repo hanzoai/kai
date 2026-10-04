@@ -1,0 +1,32 @@
+{
+  "model": "kai",
+  "state": {
+    "work_email": "cto@fintechscale.com",
+    "company_size": "250-500",
+    "use_case": "Migrating 200 developers from Copilot to self-hosted Zen Coder models on private VPC.",
+    "budget": "$100k-$250k annual allocated",
+    "timeline": "Deploying within 30 days"
+  },
+  "questions": {
+    "lead_tier": {
+      "type": "choice",
+      "instructions": "Categorize enterprise lead quality",
+      "criteria": {
+        "tier_1_strategic": "enterprise with immediate budget, clear technical fit, and urgent timeline",
+        "tier_2_growth": "mid-market with valid use case and evaluation budget",
+        "tier_3_nurture": "early stage or student with unclear timeline"
+      }
+    },
+    "qualification_score": {
+      "type": "score",
+      "instructions": "Overall lead score",
+      "criteria": [
+        "0: disqualified",
+        "1: low fit",
+        "2: moderate fit",
+        "3: high fit",
+        "4: ideal customer profile (ICP)"
+      ]
+    }
+  }
+}

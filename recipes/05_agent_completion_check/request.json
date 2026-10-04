@@ -1,0 +1,28 @@
+{
+  "model": "kai",
+  "state": {
+    "user_request": "Implement password reset flow with email token validation and 15-minute expiration test.",
+    "completed_work": [
+      "created /api/v1/auth/reset-password endpoint",
+      "token generation logic using crypto.randomBytes",
+      "written test for valid token verification",
+      "written test for expired token rejection"
+    ],
+    "test_run_result": "12 tests passed, 0 failures"
+  },
+  "questions": {
+    "is_complete": {
+      "type": "noul",
+      "instructions": "Are all requirements in the user request satisfied?"
+    },
+    "quality_score": {
+      "type": "score",
+      "instructions": "Grade completeness and test coverage",
+      "criteria": [
+        "incomplete",
+        "partially implemented",
+        "complete with full tests"
+      ]
+    }
+  }
+}
