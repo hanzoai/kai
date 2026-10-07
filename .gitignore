@@ -1,0 +1,10 @@
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.DS_Store
+__pycache__/
+*.pyc
+node_modules/
+dist/
+target/
+Cargo.lock
