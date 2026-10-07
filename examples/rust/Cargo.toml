@@ -1,0 +1,15 @@
+[package]
+name = "kai-rust-example"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "kai-rust-example"
+path = "main.rs"
+
+[dependencies]
+reqwest = { version = "0.12", features = ["json"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+
+[workspace]

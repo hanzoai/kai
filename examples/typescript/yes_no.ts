@@ -1,23 +1,28 @@
-import Hanzo from 'hanzoai';
+import { Hanzo } from 'hanzoai';
 
-const client = new Hanzo({ apiKey: process.env.HANZO_API_KEY });
+const apiKey = process.env.HANZO_API_KEY;
+const model = process.env.KAI_MODEL || 'kai'; // "kai" or "typesafe/jev-1.13"
+
+const client = new Hanzo({ apiKey });
 
 async function main() {
   const decision = await client.decisions.create({
-    model: 'kai',
-    state: 'Agent tried 5 times to execute `npm test` and failed with the same syntax error each time.',
+    model: model,
+    state: 'Customer has spent $12,000 this year, but submitted 4 negative tickets this week saying: None of our integrations work.',
     questions: {
-      is_stuck_in_loop: {
+      is_churn_risk: {
         type: 'noul',
-        instructions: 'Is the agent stuck in an unproductive failure loop?'
+        instructions: 'Is this high-value account at immediate risk of cancelling?'
       }
     }
   });
 
-  const ans = decision.answers.is_stuck_in_loop;
-  console.log(`P(Stuck): ${(ans.noul * 100).toFixed(1)}%`);
-  if (ans.noul > 0.75) {
-    console.log('Intervention: Pause agent execution and prompt user for manual guidance.');
+  const ans = decision.answers.is_churn_risk;
+  console.log(`Model: ${decision.model}`);
+  console.log(`Decision ID: ${decision.id}`);
+  console.log(`P(True): ${ans.noul}`);
+  if (ans.action) {
+    console.log(`Action Probability: ${ans.action.act_probability}`);
   }
 }
 

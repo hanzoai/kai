@@ -1,34 +1,33 @@
-import Hanzo from 'hanzoai';
+import { Hanzo } from 'hanzoai';
 
-const client = new Hanzo({ apiKey: process.env.HANZO_API_KEY });
+const apiKey = process.env.HANZO_API_KEY;
+const model = process.env.KAI_MODEL || 'kai'; // "kai" or "typesafe/jev-1.13"
+
+const client = new Hanzo({ apiKey });
 
 async function main() {
   const decision = await client.decisions.create({
-    model: 'kai',
-    state: {
-      lead_company: 'Acme Health',
-      employees: 4500,
-      budget: '$150,000/year',
-      urgency: 'Replacing OpenAI by end of Q4'
-    },
+    model: model,
+    state: 'Database connection pool exhausted. 95% of API requests returning 500 status code.',
     questions: {
-      lead_quality: {
+      severity: {
         type: 'score',
-        instructions: 'Score lead quality from 0 to 4',
+        instructions: 'Assess incident severity',
         criteria: [
-          '0: unqualified student or hobbyist',
-          '1: indie hacker with low budget',
-          '2: mid-market with clear need',
-          '3: enterprise with established budget',
-          '4: high-priority tier-1 strategic enterprise'
+          'low: non-critical glitch',
+          'medium: minor latency increase',
+          'high: subset of customers impacted',
+          'critical: complete production service outage'
         ]
       }
     }
   });
 
-  const ans = decision.answers.lead_quality;
-  console.log(`Score: ${ans.score.toFixed(2)}`);
-  console.log(`Confidence: ${ans.confidence.toFixed(4)}`);
+  const ans = decision.answers.severity;
+  console.log(`Model: ${decision.model}`);
+  console.log(`Decision ID: ${decision.id}`);
+  console.log(`Expected Score Level: ${ans.score}`);
+  console.log(`Confidence: ${ans.confidence}`);
 }
 
 main().catch(console.error);

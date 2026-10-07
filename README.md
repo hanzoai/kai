@@ -171,6 +171,93 @@ console.log(decision.answers.risk.score);
 console.log(decision.answers.requires_human_approval.noul);
 ```
 
+### Go
+Install the official Go SDK:
+```bash
+go get github.com/hanzoai/go-sdk/v8
+```
+Execute a decision (or see [`examples/go/main.go`](./examples/go/main.go)):
+```go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+)
+
+func main() {
+	apiKey := os.Getenv("HANZO_API_KEY")
+	payload, _ := json.Marshal(map[string]interface{}{
+		"model": "kai", // or "typesafe/jev-1.13"
+		"state": "High disk usage on node /dev/sda1 (98% full)",
+		"questions": map[string]interface{}{
+			"action": map[string]interface{}{
+				"type":         "choice",
+				"instructions": "Determine automated remediation action",
+				"criteria": map[string]string{
+					"purge_logs":  "safe deletion of expired logs",
+					"scale_disk":  "request EBS expansion",
+					"page_oncall": "immediate human escalation",
+				},
+			},
+		},
+	})
+
+	req, _ := http.NewRequest("POST", "https://api.hanzo.ai/v1/decisions", bytes.NewBuffer(payload))
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil { panic(err) }
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+}
+```
+
+### Rust
+Use `reqwest` or `hanzo-client` (see [`examples/rust/main.rs`](./examples/rust/main.rs)):
+```rust
+use serde_json::json;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let api_key = std::env::var("HANZO_API_KEY")?;
+    let client = reqwest::Client::new();
+
+    let res = client
+        .post("https://api.hanzo.ai/v1/decisions")
+        .bearer_auth(api_key)
+        .json(&json!({
+            "model": "kai", // or "typesafe/jev-1.13"
+            "state": "Kubernetes pod evicted: OOMKilled",
+            "questions": {
+                "triage": {
+                    "type": "choice",
+                    "instructions": "Identify next step",
+                    "criteria": {
+                        "increase_limits": "raise memory requests and limits",
+                        "restart": "restart pod on clean node",
+                        "profile_memory": "attach memory profiler to inspect leak"
+                    }
+                }
+            }
+        }))
+        .send()
+        .await?
+        .text()
+        .await?;
+
+    println!("Decision output: {}", res);
+    Ok(())
+}
+```
+
 ---
 
 ## The 18 Production Recipes

@@ -8,6 +8,9 @@ api_key = os.environ.get("HANZO_API_KEY")
 with open("request.json") as f:
     payload = json.load(f)
 
+model = os.environ.get("KAI_MODEL", payload.get("model", "kai"))
+payload["model"] = model
+
 try:
     client = Hanzo(api_key=api_key)
     decision = client.decisions.create(

@@ -1,10 +1,13 @@
 import os
 from hanzoai import Hanzo
 
-client = Hanzo(api_key=os.environ.get("HANZO_API_KEY"))
+api_key = os.environ.get("HANZO_API_KEY")
+model = os.environ.get("KAI_MODEL", "kai")  # "kai" or "typesafe/jev-1.13"
+
+client = Hanzo(api_key=api_key)
 
 decision = client.decisions.create(
-    model="kai",
+    model=model,
     state="Pull Request #412 changes 1,200 lines across core cryptography and authentication middleware.",
     questions={
         "review_depth": {
@@ -21,5 +24,6 @@ decision = client.decisions.create(
 )
 
 ans = decision.answers["review_depth"]
+print(f"Model: {decision.model}")
 print(f"Expected Score Level: {ans.score:.2f}")
 print(f"Confidence: {ans.confidence:.4f}")

@@ -2,6 +2,7 @@ import Hanzo from 'hanzoai';
 import * as fs from 'fs';
 
 const payload = JSON.parse(fs.readFileSync('request.json', 'utf8'));
+payload.model = process.env.KAI_MODEL || payload.model || 'kai';
 
 async function main() {
   const client = new Hanzo({ apiKey: process.env.HANZO_API_KEY });
