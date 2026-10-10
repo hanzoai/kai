@@ -146,8 +146,8 @@ HANZO_API_KEY=... ./test.sh
 language. It needs curl, jq, uv, Node.js, Go and Cargo. An example passes when it
 answers. A recipe passes when every answer listed in its `expect.json` is the
 obvious one for its input; a question with no obvious answer on that input is
-printed and not checked. CI runs the same script on every push and once a day
-([`hanzo.yml`](./hanzo.yml)).
+printed and not checked. [`hanzo.yml`](./hanzo.yml) makes the same script the CI
+gate, run on every push, every pull request and once a day.
 
 | | examples | recipes |
 | :--- | :--- | :--- |
