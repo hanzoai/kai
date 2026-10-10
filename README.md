@@ -1,84 +1,52 @@
-# Kai Cookbook & Decision Recipes
+# Kai Cookbook
 
-Kai is Hanzo AI's proprietary decision model. 
-
-When your agent, workflow, or business system faces a bounded question (e.g. *which team, which tool, allow or deny, is this task complete, rate the risk*), generating unpredictable natural language is slow, costly, and prone to hallucinations. 
-
-Kai answers bounded questions with **calibrated probability distributions** over a typed answer space instead of generated tokens. 
+Kai is Hanzo AI's decision model. You send a state (text, an object or an
+array) and typed questions; Kai answers each question with probabilities over
+the answers you declared, and writes no text.
 
 - **Endpoint:** `POST https://api.hanzo.ai/v1/decisions`
-- **Official Python SDK:** [pypi.org/project/hanzoai](https://pypi.org/project/hanzoai/)
-- **Official TypeScript SDK:** [npmjs.com/package/hanzoai](https://www.npmjs.com/package/hanzoai)
-- **Documentation:** [docs.hanzo.ai/docs/decisions](https://docs.hanzo.ai/docs/decisions)
-- **Model Overview:** [hanzo.ai/models](https://hanzo.ai/models)
+- **Model:** `kai` (also `hanzo/kai`). The endpoint also serves `typesafe/jev-1.13`.
+- **Price:** $0.021 per million input tokens; output tokens are free. Jev costs $0.042.
+- **SDKs:** [`hanzoai` on PyPI](https://pypi.org/project/hanzoai/) and [`hanzoai` on npm](https://www.npmjs.com/package/hanzoai), both 8.5.704 here
+- **Docs:** [docs.hanzo.ai/docs/decisions](https://docs.hanzo.ai/docs/decisions)
 
----
+Everything below was measured against production on 2026-10-09, with `routing.checkpoint`
+reading `kai-1.2`.
 
-## Why Use a Decision Model Over Generative LLMs?
+## Questions and answers
 
-| Feature | Generative LLMs (GPT-4o, Claude) | Kai Decision Model |
+| `type` | you send | Kai returns in `answers.<name>` |
 | :--- | :--- | :--- |
-| **Output Type** | Token-by-token string stream | Typed, calibrated probabilities (`choice`, `score`, `noul`) |
-| **Latency** | 800ms – 4,000ms (autoregressive) | **30ms – 120ms** (single forward pass) |
-| **Hallucination** | Non-zero probability of invalid output | **0%** (mathematically bounded to declared criteria) |
-| **Calibration** | Overconfident / uncalibrated | Calibrated $P(\text{option})$: $0.80$ means correct 80% of the time |
-| **Policy Authority** | Hard to enforce strictly | **Deterministic Join:** Model verdicts tighten policy, never loosen |
-| **Cost** | High (charged per generated token) | Up to **90% cheaper** per decision |
+| `choice` | `criteria`: an object of option → description, or a list of options | `choice`, `probabilities` (one per option, summing to 1), `answer_confidence`, `confidence` |
+| `score` | `criteria`: the ordered levels, lowest first | `score` (the expected level index), `legend` (index → level), `probabilities` (index → probability), `answer_confidence`, `confidence` |
+| `noul` | `instructions`: a yes/no question | `noul`: P(true) |
 
----
+`answer_confidence` is the probability of the top answer. `confidence` rescales it
+so a uniform distribution reads 0 and a certain answer reads 1:
+(p − 1/n) / (1 − 1/n) over n options. Score levels go in `criteria`; a `levels`
+field is refused with 422.
 
-## The Three Primitive Question Types
+Every response also carries `id`, `model`, `provider`, `usage` (`input_tokens`;
+`output_tokens` is 0), `routing` (checkpoint, weights SHA-256, calibration id,
+device, `trained`, `extrapolated`), `state_hash` and `latency_ms`.
 
-Every Kai decision request takes a `state` (string, object, or array) and one or more typed `questions`:
+## Limits
 
-### 1. `choice` (Categorical Classification)
-Selects the most likely category from an arbitrary set of options with semantic criteria:
-```json
-{
-  "type": "choice",
-  "instructions": "Which department should handle this ticket?",
-  "criteria": {
-    "billing": "charges, invoices, refunds, plan changes",
-    "technical": "errors, outages, integrations, bugs",
-    "security": "unauthorized access, compliance, leaks"
-  }
-}
-```
-**Response:** Returns `choice: "billing"`, `confidence: 0.94`, and normalized `probabilities` for every option.
-
-### 2. `score` (Ordinal / Likert Scale)
-Calculates expected rating/severity along an ordered progression:
-```json
-{
-  "type": "score",
-  "instructions": "How urgent is this incident?",
-  "criteria": [
-    "low: informational question, zero user impact",
-    "normal: minor issue with existing workaround",
-    "high: production performance degraded or revenue at risk",
-    "critical: complete service outage or active security breach"
-  ]
-}
-```
-**Response:** Returns `score: 2.85` (expected float level), `confidence: 0.91`, and distribution across indices.
-
-### 3. `noul` (Boolean Yes/No Verdict)
-Evaluates a proposition with calibrated true/false probability:
-```json
-{
-  "type": "noul",
-  "instructions": "Is this customer at immediate risk of churn?"
-}
-```
-**Response:** Returns `noul: 0.88` ($P(\text{true}) = 88\%$) and `action: { "act_probability": 0.92 }`.
-
----
+- **Questions:** up to 100 per request; 101 is refused with 422.
+- **State length:** Kai reads each question with up to 1,024 tokens of state beside
+  it, the length it was trained at (`routing.trained`). Longer input is accepted
+  and marked `routing.extrapolated: true`, and it is not reliable: in a 3,982-token
+  state, the fact "The server is in Paris." read P(true) 0.985 at the start, 0.663
+  in the middle and 0.507 at the end. Keep the state under 1,024 tokens.
+- **Time:** one three-option choice question took 29–349 ms of server time on CPU
+  across 70 calls (medians 48 ms and 151 ms in two runs) and 0.3–0.6 s round trip
+  from one client. Time grows with questions: 100 noul questions took 13.9 s.
+  Each response reports its own `latency_ms`.
 
 ## Quickstart
 
-### cURL
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -107,210 +75,118 @@ curl -X POST https://api.hanzo.ai/v1/decisions \
   }'
 ```
 
-### Python
-Install the official SDK:
-```bash
-pip install hanzoai
-```
-Execute a decision:
+Python (`pip install -r requirements.txt`):
+
 ```python
 import os
-from hanzoai import Hanzo
 
-client = Hanzo(api_key=os.environ["HANZO_API_KEY"])
+from hanzoai.cloud import ApiClient, Configuration
+from hanzoai.cloud.api import AiApi
+from hanzoai.cloud.models.ai_decisions_request import AiDecisionsRequest
 
-decision = client.decisions.create(
-    model="kai",
-    state={"ticket_id": 4821, "text": "Can I get an extension on my payment due date?"},
-    questions={
+ai = AiApi(ApiClient(Configuration(access_token=os.environ["HANZO_API_KEY"])))
+decision = ai.post_decisions(AiDecisionsRequest.from_dict({
+    "model": "kai",
+    "state": {"ticket_id": 4821, "text": "Can I get an extension on my payment due date?"},
+    "questions": {
         "team": {
             "type": "choice",
             "instructions": "Which team handles this?",
-            "criteria": {"billing": "invoices and payments", "support": "technical issues"}
+            "criteria": {"billing": "invoices and payments", "support": "technical issues"},
         },
-        "is_churn_risk": {
-            "type": "noul",
-            "instructions": "Is the user churning?"
-        }
-    }
-)
-
-print(decision.answers["team"].choice)          # "billing"
-print(decision.answers["team"].confidence)      # 0.96
-print(decision.answers["is_churn_risk"].noul)   # 0.12
-```
-
-### TypeScript / Node.js
-Install the official package:
-```bash
-npm install hanzoai
-```
-Execute a decision:
-```typescript
-import Hanzo from 'hanzoai';
-
-const client = new Hanzo({ apiKey: process.env.HANZO_API_KEY });
-
-const decision = await client.decisions.create({
-  model: 'kai',
-  state: { pull_request: 104, diff_lines: 480, files: ['auth.ts', 'token.go'] },
-  questions: {
-    risk: {
-      type: 'score',
-      instructions: 'Rate security risk of code change',
-      criteria: ['low: documentation or cosmetic', 'medium: internal logic', 'high: security or auth paths']
+        "is_churn_risk": {"type": "noul", "instructions": "Is the user churning?"},
     },
-    requires_human_approval: {
-      type: 'noul',
-      instructions: 'Does this PR require manual sign-off?'
-    }
-  }
+}))
+
+print(decision.answers["team"].choice, decision.answers["team"].probabilities)
+print(decision.answers["is_churn_risk"].noul)
+```
+
+TypeScript (`npm install`, then `npx tsx file.ts`):
+
+```typescript
+import { AiApi, Configuration } from 'hanzoai';
+
+const ai = new AiApi(new Configuration({ accessToken: process.env.HANZO_API_KEY }));
+const { data: decision } = await ai.postDecisions({
+  aiDecisionsRequest: {
+    model: 'kai',
+    state: { pull_request: 104, diff_lines: 480, files: ['auth.ts', 'token.go'] },
+    questions: {
+      risk: {
+        type: 'score',
+        instructions: 'Rate security risk of code change',
+        criteria: ['low: documentation or cosmetic', 'medium: internal logic', 'high: security or auth paths'],
+      },
+      requires_human_approval: { type: 'noul', instructions: 'Does this PR require manual sign-off?' },
+    },
+  },
+}).catch((e) => {
+  // The axios error holds the request headers, the API key among them: keep only status and body.
+  throw new Error(e.response ? `HTTP ${e.response.status} ${JSON.stringify(e.response.data)}` : e.message);
 });
 
-console.log(decision.answers.risk.score);
-console.log(decision.answers.requires_human_approval.noul);
+console.log(decision.answers.risk.score, decision.answers.requires_human_approval.noul);
 ```
 
-### Go
-Install the official Go SDK:
+Go ([`examples/go`](./examples/go/main.go)) and Rust ([`examples/rust`](./examples/rust/main.rs))
+call the endpoint over plain HTTP: Go's SDK (`go-sdk/v8` 8.5.623) refuses a choice
+question with named criteria, and the Rust crate (`hanzo-client` 8.5.156) has no
+`/v1/decisions`.
+
+`KAI_MODEL` switches every example and recipe to another model the endpoint serves.
+
+## Run everything
+
 ```bash
-go get github.com/hanzoai/go-sdk/v8
-```
-Execute a decision (or see [`examples/go/main.go`](./examples/go/main.go)):
-```go
-package main
-
-import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"os"
-)
-
-func main() {
-	apiKey := os.Getenv("HANZO_API_KEY")
-	payload, _ := json.Marshal(map[string]interface{}{
-		"model": "kai", // or "typesafe/jev-1.13"
-		"state": "High disk usage on node /dev/sda1 (98% full)",
-		"questions": map[string]interface{}{
-			"action": map[string]interface{}{
-				"type":         "choice",
-				"instructions": "Determine automated remediation action",
-				"criteria": map[string]string{
-					"purge_logs":  "safe deletion of expired logs",
-					"scale_disk":  "request EBS expansion",
-					"page_oncall": "immediate human escalation",
-				},
-			},
-		},
-	})
-
-	req, _ := http.NewRequest("POST", "https://api.hanzo.ai/v1/decisions", bytes.NewBuffer(payload))
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := (&http.Client{}).Do(req)
-	if err != nil { panic(err) }
-	defer resp.Body.Close()
-
-	body, _ := io.ReadAll(resp.Body)
-	fmt.Println(string(body))
-}
+HANZO_API_KEY=... ./test.sh
 ```
 
-### Rust
-Use `reqwest` or `hanzo-client` (see [`examples/rust/main.rs`](./examples/rust/main.rs)):
-```rust
-use serde_json::json;
+`test.sh` runs every example and recipe against production and prints a count per
+language. It needs curl, jq, uv, Node.js, Go and Cargo. An example passes when it
+answers. A recipe passes when every answer listed in its `expect.json` is the
+obvious one for its input; a question with no obvious answer on that input is
+printed and not checked. CI runs the same script on every push and once a day
+([`hanzo.yml`](./hanzo.yml)).
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let api_key = std::env::var("HANZO_API_KEY")?;
-    let client = reqwest::Client::new();
+| | examples | recipes |
+| :--- | :--- | :--- |
+| curl | 4 of 4 | |
+| Python | 4 of 4 | 6 of 18 |
+| TypeScript | 4 of 4 | 6 of 18 |
+| Go | 1 of 1 | |
+| Rust | 1 of 1 | |
 
-    let res = client
-        .post("https://api.hanzo.ai/v1/decisions")
-        .bearer_auth(api_key)
-        .json(&json!({
-            "model": "kai", // or "typesafe/jev-1.13"
-            "state": "Kubernetes pod evicted: OOMKilled",
-            "questions": {
-                "triage": {
-                    "type": "choice",
-                    "instructions": "Identify next step",
-                    "criteria": {
-                        "increase_limits": "raise memory requests and limits",
-                        "restart": "restart pod on clean node",
-                        "profile_memory": "attach memory profiler to inspect leak"
-                    }
-                }
-            }
-        }))
-        .send()
-        .await?
-        .text()
-        .await?;
+## Recipes
 
-    println!("Decision output: {}", res);
-    Ok(())
-}
-```
+Each recipe in [`recipes/`](./recipes/) holds `request.json` (the call), `expect.json`
+(the checked answers), `run.py` and `run.ts`. Use cases are the
+[systemonemodels.org](https://systemonemodels.org/) labels a recipe genuinely fits;
+a dash means none does. Python and TypeScript give the same answers.
 
----
+| Recipe | Use cases | Primitives | Kai |
+| :--- | :--- | :--- | :--- |
+| [01 Agent preflight](./recipes/01_agent_preflight/) | Intent and model routing | choice, noul | pass |
+| [02 Agent tool selection](./recipes/02_agent_tool_selection/) | Agent routing and skill selection | choice, noul | fail: `primary_tool` search_web |
+| [03 Agent command risk](./recipes/03_agent_command_risk/) | LLM guardrails | score, choice | fail: `destruction_risk` level 1, `verdict` allow |
+| [04 Agent progress](./recipes/04_agent_progress_eval/) | — | noul, choice | fail: `is_stuck` 0.499, `next_strategy` continue |
+| [05 Agent completion](./recipes/05_agent_completion_check/) | — | noul, score | fail: `is_complete` 0.213, `quality_score` level 1 |
+| [06 Support triage](./recipes/06_support_triage/) | Support inbox triage | choice, score | pass |
+| [07 Support churn risk](./recipes/07_support_churn_risk/) | Support inbox triage | noul, choice | fail: `churn_propensity` 0.043 |
+| [08 Lead qualification](./recipes/08_sales_lead_qualification/) | — | choice, score | fail: `lead_tier` tier_2_growth |
+| [09 Sales next action](./recipes/09_sales_next_action/) | — | choice | pass |
+| [10 Plan recommendation](./recipes/10_commerce_recommendation/) | — | choice | fail: `recommended_plan` custom_enterprise |
+| [11 Checkout recovery offer](./recipes/11_commerce_next_best_offer/) | — | choice | pass |
+| [12 Content moderation](./recipes/12_content_moderation/) | LLM guardrails | noul, choice | fail: `action` allow |
+| [13 Code review gate](./recipes/13_code_review_gate/) | — | choice | fail: `merge_risk` require_peer_review |
+| [14 Beta enrollment](./recipes/14_feature_flag_routing/) | — | noul | fail: `enroll_in_beta` 0.499 |
+| [15 Threat scoring](./recipes/15_security_threat_scoring/) | — | score, choice | fail: `threat_severity` level 2 |
+| [16 Incident severity](./recipes/16_incident_severity_triage/) | — | choice, noul | pass |
+| [17 RAG retrieval router](./recipes/17_rag_retrieval_router/) | Intent and model routing | choice | pass |
+| [18 Invoice consistency](./recipes/18_structured_data_validation/) | — | noul, score | fail: `confidence_rating` level 2 |
 
-## The 18 Production Recipes
+## Support
 
-Explore ready-to-run recipes in [`recipes/`](./recipes/):
-
-### Agentic AI & Coding
-1. **[01. Agent Preflight](./recipes/01_agent_preflight/)**: Classify task complexity, select model tier, and choose execution route.
-2. **[02. Agent Tool Selection](./recipes/02_agent_tool_selection/)**: Precision shortlist from 40+ MCP tools without cluttering context.
-3. **[03. Agent Command Risk Gate](./recipes/03_agent_command_risk/)**: Enforce policy join (allow / ask / deny) before running terminal commands.
-4. **[04. Agent Progress & Loop Detection](./recipes/04_agent_progress_eval/)**: Detect stuck agent loops and evaluate state convergence.
-5. **[05. Agent Definition of Done](./recipes/05_agent_completion_check/)**: Verify if multi-step goals are satisfied before halting.
-
-### Customer Support & Operations
-6. **[06. Support Ticket Routing](./recipes/06_support_triage/)**: Multi-class department classification with confidence thresholds.
-7. **[07. Real-Time Churn Detection](./recipes/07_support_churn_risk/)**: Intercept churn indicators during active support interactions.
-8. **[16. Incident Severity Triage](./recipes/16_incident_severity_triage/)**: Automated P0-P4 severity scoring from telemetry alerts.
-
-### Sales & Commerce
-9. **[08. Inbound Lead Qualification](./recipes/08_sales_lead_qualification/)**: BANT score evaluation for high-velocity SDR routing.
-10. **[09. Sales Next Best Action](./recipes/09_sales_next_action/)**: Determine whether to call, email, demo, or nurture prospect.
-11. **[10. E-Commerce Product Recommendation](./recipes/10_commerce_recommendation/)**: Graph-aware catalog match for cart cross-sell.
-12. **[11. Dynamic Promotion & Next Best Offer](./recipes/11_commerce_next_best_offer/)**: Select optimal retention discount or incentive.
-
-### Security, Engineering & Infrastructure
-13. **[12. Content Moderation & Safety Guard](./recipes/12_content_moderation/)**: Zero-leak policy classification for user inputs.
-14. **[13. Code Review & Auto-Merge Gate](./recipes/13_code_review_gate/)**: Pull request risk grading for CI/CD pipeline automation.
-15. **[14. Feature Flag Dynamic Rollout](./recipes/14_feature_flag_routing/)**: Contextual traffic allocation for feature experiments.
-16. **[15. Security Threat Scoring](./recipes/15_security_threat_scoring/)**: API anomaly detection and credential stuffing defense.
-17. **[17. RAG Semantic Retrieval Router](./recipes/17_rag_retrieval_router/)**: Decide when to hit vector store vs web search vs direct LLM.
-18. **[18. Structured JSON Schema Validator](./recipes/18_structured_data_validation/)**: Verify generative LLM JSON compliance deterministically.
-
----
-
-## Deterministic Policy Joins
-
-Kai is designed to work in tandem with deterministic rule engines. A model verdict can **tighten** an authorization policy, but can **never loosen** a hard security rule:
-
-```text
-               ┌────────────────────────┐
-               │ Deterministic Policy   │ ──► Verdict: ASK
-               └────────────────────────┘          │
-                                                   ▼
-               ┌────────────────────────┐    [ Policy Join ] ──► FINAL: DENY
-               │ Kai Decision Model     │ ──► Verdict: DENY
-               └────────────────────────┘
-```
-
-See [Recipe 03: Command Risk Gate](./recipes/03_agent_command_risk/) for an active implementation.
-
----
-
-## License & Support
 - Maintained by Hanzo AI Inc.
-- Technical Support: [dev@hanzo.ai](mailto:dev@hanzo.ai)
+- Technical support: [dev@hanzo.ai](mailto:dev@hanzo.ai)
 - Status: [status.hanzo.ai](https://status.hanzo.ai)
