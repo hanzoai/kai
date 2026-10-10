@@ -14,8 +14,12 @@ test:
     run: |
       set -euo pipefail
       : "${HANZO_API_TOKEN:?no CI identity: the KMS login did not run, so /ci/kai cannot be read}"
-      HANZO_API_KEY=$(curl -fsS --max-time 30 -H "Authorization: Bearer $HANZO_API_TOKEN" \
-        "https://api.hanzo.ai/v1/kms/secrets/ci/kai/HANZO_API_KEY?env=prod" | jq -r '.value // empty')
+      # KMS names the holder it refused, so a refusal is printed rather than reduced to an exit code.
+      resp=$(curl -sS --max-time 30 -w '\n%{http_code}' -H "Authorization: Bearer $HANZO_API_TOKEN" \
+        "https://api.hanzo.ai/v1/kms/secrets/ci/kai/HANZO_API_KEY?env=prod")
+      code=${resp##*$'\n'} resp=${resp%$'\n'*}
+      [ "$code" = 200 ] || { echo "::error::KMS answered $code: $(jq -r '.detail // .' <<<"$resp")"; exit 1; }
+      HANZO_API_KEY=$(jq -r '.value // empty' <<<"$resp") resp=
       [ -n "$HANZO_API_KEY" ] || { echo "::error::KMS holds no HANZO_API_KEY at /ci/kai (prod)"; exit 1; }
       echo "::add-mask::$HANZO_API_KEY"
       HANZO_API_KEY="$HANZO_API_KEY" ./test.sh
