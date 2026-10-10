@@ -2,17 +2,19 @@
 # Score estimation example with Kai / Jev
 # Usage:
 #   ./score.sh                           # uses default model "kai"
-#   KAI_MODEL="typesafe/jev-1.13" ./score.sh # uses Jev probabilistic reasoning
+#   KAI_MODEL="typesafe/jev-1.13" ./score.sh # uses Jev
+
+set -euo pipefail
 
 MODEL="${KAI_MODEL:-kai}"
-API_KEY="${HANZO_API_KEY:-$1}"
+API_KEY="${HANZO_API_KEY:-${1:-}}"
 
 if [ -z "$API_KEY" ]; then
   echo "Error: HANZO_API_KEY is required (set env var or pass as first argument)" >&2
   exit 1
 fi
 
-curl -s -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body -X POST https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $API_KEY" \
   -H "Content-Type: application/json" \
   -d "{

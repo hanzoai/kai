@@ -1,3 +1,5 @@
+// net/http rather than github.com/hanzoai/go-sdk/v8: its v8.5.623 decoder refuses a choice
+// question with named criteria ("data matches more than one schema in oneOf").
 package main
 
 import (
@@ -36,10 +38,16 @@ type DecisionAnswer struct {
 }
 
 func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	apiKey := os.Getenv("HANZO_API_KEY")
 	if apiKey == "" {
-		fmt.Fprintln(os.Stderr, "Error: HANZO_API_KEY environment variable is required")
-		os.Exit(1)
+		return fmt.Errorf("HANZO_API_KEY environment variable is required")
 	}
 
 	model := os.Getenv("KAI_MODEL")
@@ -71,12 +79,12 @@ func main() {
 
 	payload, err := json.Marshal(reqBody)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	req, err := http.NewRequest("POST", baseURL+"/v1/decisions", bytes.NewBuffer(payload))
 	if err != nil {
-		panic(err)
+		return err
 	}
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 	req.Header.Set("Content-Type", "application/json")
@@ -84,39 +92,38 @@ func main() {
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if resp.StatusCode >= 400 {
-		fmt.Fprintf(os.Stderr, "HTTP %d Error: %s\n", resp.StatusCode, string(body))
-		os.Exit(1)
+		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, body)
 	}
 
 	var decision DecisionResponse
 	if err := json.Unmarshal(body, &decision); err != nil {
-		fmt.Println("Raw response:", string(body))
-		return
+		return fmt.Errorf("decode response: %w", err)
 	}
 
+	ans, ok := decision.Answers["action"]
+	if !ok || ans.Choice == nil {
+		return fmt.Errorf("no choice answer for \"action\" in %s", body)
+	}
 	fmt.Printf("Model: %s\n", decision.Model)
 	fmt.Printf("Decision ID: %s\n", decision.ID)
 	fmt.Printf("Latency: %.1fms\n", decision.LatencyMs)
-	if ans, ok := decision.Answers["action"]; ok && ans.Choice != nil {
-		fmt.Printf("Action Choice: %s\n", *ans.Choice)
-		if ans.Confidence != nil {
-			fmt.Printf("Confidence: %.4f\n", *ans.Confidence)
-		}
-		if len(ans.Probabilities) > 0 {
-			fmt.Println("Probabilities:")
-			for opt, p := range ans.Probabilities {
-				fmt.Printf("  - %s: %.2f%%\n", opt, p*100)
-			}
-		}
+	fmt.Printf("Action Choice: %s\n", *ans.Choice)
+	if ans.Confidence != nil {
+		fmt.Printf("Confidence: %.4f\n", *ans.Confidence)
 	}
+	fmt.Println("Probabilities:")
+	for opt, p := range ans.Probabilities {
+		fmt.Printf("  - %s: %.2f%%\n", opt, p*100)
+	}
+	return nil
 }
