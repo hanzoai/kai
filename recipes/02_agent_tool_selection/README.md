@@ -1,8 +1,8 @@
-# Agent Tool Selection: Precision Shortlisting from 40+ Tools
+# Agent Tool Selection
 
-Instead of feeding 40+ tool schemas into an LLM prompt (which blows up context and invites hallucinated calls), let Kai rank and shortlist the top 3 relevant tools for the current step.
+Ask Kai which of four tools a coding agent should call first for its current step, and whether writing files is allowed at that step.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -39,20 +39,23 @@ Instead of feeding 40+ tool schemas into an LLM prompt (which blows up context a
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `primary_tool` (choice): `run_command` or `view_file`
+- `allow_file_write` (noul): not checked, no obvious answer on this input
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/02_agent_tool_selection/request.json
+
+python3 recipes/02_agent_tool_selection/run.py
+npx tsx recipes/02_agent_tool_selection/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

@@ -1,8 +1,8 @@
-# Site Reliability: Production Incident Severity Triage
+# Site Reliability: Incident Severity Triage
 
-Classify infrastructure alerts into P0 through P3 incident severity levels and trigger on-call PagerDuty alerts.
+Classify an alert's incident severity and ask whether it warrants paging executives.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -35,20 +35,23 @@ Classify infrastructure alerts into P0 through P3 incident severity levels and t
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `severity` (choice): `p1_critical` or `p2_major`
+- `page_executives` (noul): not checked, no obvious answer on this input
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/16_incident_severity_triage/request.json
+
+python3 recipes/16_incident_severity_triage/run.py
+npx tsx recipes/16_incident_severity_triage/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

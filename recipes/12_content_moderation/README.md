@@ -1,8 +1,8 @@
-# Safety & Content Moderation: Multi-Class Policy Guard
+# Content Moderation: Jailbreak Guard
 
-Check user prompts and LLM completions for safety violations, prompt injection, and toxic content.
+Ask Kai whether a prompt is a jailbreak attempt and what the gateway should do with it.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -28,20 +28,23 @@ Check user prompts and LLM completions for safety violations, prompt injection, 
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `is_jailbreak_attempt` (noul): P(true) above 0.5
+- `action` (choice): `block`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/12_content_moderation/request.json
+
+python3 recipes/12_content_moderation/run.py
+npx tsx recipes/12_content_moderation/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

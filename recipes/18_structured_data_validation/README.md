@@ -1,8 +1,8 @@
-# Data Integrity: LLM Output Compliance Validator
+# Data Integrity: Invoice Consistency
 
-Deterministically validate that generative LLM output complies with business constraints and contains zero hallucinations.
+Ask Kai whether an extracted invoice's subtotal and tax add up to its total, and how far to trust the extraction.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -33,20 +33,23 @@ Deterministically validate that generative LLM output complies with business con
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `is_arithmetically_valid` (noul): P(true) below 0.5
+- `confidence_rating` (score): most probable level 0 `unreliable / contradictory`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/18_structured_data_validation/request.json
+
+python3 recipes/18_structured_data_validation/run.py
+npx tsx recipes/18_structured_data_validation/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

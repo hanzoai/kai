@@ -1,8 +1,8 @@
-# Agent Preflight: Task Routing & Scope Determination
+# Agent Preflight
 
-Before an autonomous coding agent executes a prompt, evaluate task complexity, select the appropriate model tier (fast vs frontier), and decide whether user clarification is needed.
+Before a coding agent starts a task, ask Kai what kind of task it is, which model tier it needs, and whether the request is missing information.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -40,20 +40,24 @@ Before an autonomous coding agent executes a prompt, evaluate task complexity, s
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `task_type` (choice): `new_feature` or `refactor`
+- `model_tier` (choice): `ultra`
+- `requires_user_clarification` (noul): not checked, no obvious answer on this input
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/01_agent_preflight/request.json
+
+python3 recipes/01_agent_preflight/run.py
+npx tsx recipes/01_agent_preflight/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

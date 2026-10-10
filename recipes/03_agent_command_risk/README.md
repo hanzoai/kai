@@ -1,8 +1,8 @@
-# Agent Command Risk: Deterministic Policy Join Gate
+# Agent Command Risk Gate
 
-Enforce safe bash execution in agent sandboxes. Deterministic policy states: read operations ALLOW, unknown operations ASK, destructive deletions DENY. Kai's model verdict tightens policy verdicts.
+Before an agent runs a shell command, ask Kai how destructive the command is and whether to allow it, ask a person, or deny it. Your own policy keeps the final say.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -36,20 +36,23 @@ Enforce safe bash execution in agent sandboxes. Deterministic policy states: rea
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `destruction_risk` (score): most probable level 3 `3: broad, unconstrained data purge`
+- `verdict` (choice): `ask` or `deny`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/03_agent_command_risk/request.json
+
+python3 recipes/03_agent_command_risk/run.py
+npx tsx recipes/03_agent_command_risk/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

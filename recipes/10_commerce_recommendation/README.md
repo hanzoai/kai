@@ -1,8 +1,8 @@
-# Commerce: Next-Best Subscription Plan Recommendation
+# Commerce: Plan Recommendation
 
-Analyze a developer's token usage velocity and model preferences to recommend the ideal plan upgrade.
+Pick the plan to offer a developer from their usage and rate-limit history.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -30,20 +30,22 @@ Analyze a developer's token usage velocity and model preferences to recommend th
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `recommended_plan` (choice): `developer_pro`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/10_commerce_recommendation/request.json
+
+python3 recipes/10_commerce_recommendation/run.py
+npx tsx recipes/10_commerce_recommendation/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

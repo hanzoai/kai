@@ -1,0 +1,9 @@
+{
+  "task_type": [
+    "new_feature",
+    "refactor"
+  ],
+  "model_tier": [
+    "ultra"
+  ]
+}

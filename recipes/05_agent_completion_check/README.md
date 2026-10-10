@@ -1,8 +1,8 @@
-# Agent Completion: Definition of Done Verification
+# Agent Completion Check
 
-Before an agent calls stop, verify that all requested deliverables, edge cases, and test assertions are satisfied.
+Before an agent stops, ask Kai whether the work it reports covers everything the user asked for.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -35,20 +35,23 @@ Before an agent calls stop, verify that all requested deliverables, edge cases, 
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `is_complete` (noul): P(true) above 0.5
+- `quality_score` (score): most probable level 2 `complete with full tests`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/05_agent_completion_check/request.json
+
+python3 recipes/05_agent_completion_check/run.py
+npx tsx recipes/05_agent_completion_check/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

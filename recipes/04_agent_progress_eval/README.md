@@ -1,8 +1,8 @@
 # Agent Progress & Loop Detection
 
-Evaluate whether an agent is making forward progress toward goal convergence or stuck spinning its wheels in an unproductive failure loop.
+Ask Kai whether an agent that keeps hitting the same failure is stuck, and what the runtime should do next.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -34,20 +34,23 @@ Evaluate whether an agent is making forward progress toward goal convergence or 
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `is_stuck` (noul): P(true) above 0.5
+- `next_strategy` (choice): `rollback` or `escalate`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/04_agent_progress_eval/request.json
+
+python3 recipes/04_agent_progress_eval/run.py
+npx tsx recipes/04_agent_progress_eval/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

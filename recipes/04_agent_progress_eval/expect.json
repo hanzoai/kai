@@ -1,0 +1,7 @@
+{
+  "is_stuck": true,
+  "next_strategy": [
+    "rollback",
+    "escalate"
+  ]
+}

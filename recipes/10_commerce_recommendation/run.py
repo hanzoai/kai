@@ -1,36 +1,40 @@
-import os
+"""Send request.json to Kai with the hanzoai SDK and check each answer against expect.json."""
 import json
-import requests
-from hanzoai import Hanzo
+import os
+import sys
+from pathlib import Path
 
-api_key = os.environ.get("HANZO_API_KEY")
+from hanzoai.cloud import ApiClient, Configuration
+from hanzoai.cloud.api import AiApi
+from hanzoai.cloud.models.ai_decisions_request import AiDecisionsRequest
 
-with open("request.json") as f:
-    payload = json.load(f)
+here = Path(__file__).parent
+body = json.loads((here / "request.json").read_text())
+body["model"] = os.environ.get("KAI_MODEL", body["model"])
+expect = json.loads((here / "expect.json").read_text())
 
-model = os.environ.get("KAI_MODEL", payload.get("model", "kai"))
-payload["model"] = model
+ai = AiApi(ApiClient(Configuration(access_token=os.environ["HANZO_API_KEY"])))
+decision = ai.post_decisions(AiDecisionsRequest.from_dict(body))
+print(f"{decision.id} {decision.model}: {decision.usage.input_tokens} input tokens, {decision.latency_ms:.0f} ms")
 
-try:
-    client = Hanzo(api_key=api_key)
-    decision = client.decisions.create(
-        model=payload["model"],
-        state=payload["state"],
-        questions=payload["questions"]
-    )
-    print("Decision ID:", decision.id)
-    print(f"Latency: {decision.latency_ms:.1f}ms")
-    for q_name, ans in decision.answers.items():
-        if hasattr(ans, 'choice') and ans.choice:
-            print(f"[{q_name}] Choice: {ans.choice} (confidence: {ans.confidence:.4f})")
-        elif hasattr(ans, 'score') and ans.score is not None:
-            print(f"[{q_name}] Score: {ans.score:.2f} (confidence: {ans.confidence:.4f})")
-        elif hasattr(ans, 'noul') and ans.noul is not None:
-            print(f"[{q_name}] Noul (P(true)): {ans.noul:.4f}")
-except Exception as e:
-    resp = requests.post(
-        "https://api.hanzo.ai/v1/decisions",
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-        json=payload
-    )
-    print(json.dumps(resp.json(), indent=2))
+wrong = 0
+for name in sorted(set(expect) - set(decision.answers)):
+    wrong += 1
+    print(f"  FAIL  {name}: expected an answer, got none")
+for name, a in decision.answers.items():
+    if a.type == "noul":
+        got, said = a.noul > 0.5, f"P(true) {a.noul:.3f}"
+    elif a.type == "score":
+        top = max(a.probabilities, key=a.probabilities.get)
+        got, said = int(top), f"level {top} '{a.legend[top]}' at {a.probabilities[top]:.3f} (score {a.score:.2f})"
+    else:
+        got, said = a.choice, f"{a.choice} at {a.answer_confidence:.3f}"
+    want = expect.get(name)
+    if want is None:
+        print(f"  ----  {name}: {said} (not checked: no obvious answer on this input)")
+    elif got == want if isinstance(want, bool) else got in want:
+        print(f"  pass  {name}: {said}")
+    else:
+        wrong += 1
+        print(f"  FAIL  {name}: {said}, expected {want}")
+sys.exit(1 if wrong else 0)

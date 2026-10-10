@@ -1,8 +1,8 @@
-# Sales: Inbound Lead BANT Qualification
+# Sales: Inbound Lead Qualification
 
-Score incoming inbound leads on Budget, Authority, Need, and Timeline (BANT) to prioritize enterprise SDR outreach.
+Sort an inbound lead into a tier and give it an overall fit score.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -39,20 +39,23 @@ Score incoming inbound leads on Budget, Authority, Need, and Timeline (BANT) to 
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `lead_tier` (choice): `tier_1_strategic`
+- `qualification_score` (score): most probable level 3 `3: high fit` or level 4 `4: ideal customer profile (ICP)`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/08_sales_lead_qualification/request.json
+
+python3 recipes/08_sales_lead_qualification/run.py
+npx tsx recipes/08_sales_lead_qualification/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

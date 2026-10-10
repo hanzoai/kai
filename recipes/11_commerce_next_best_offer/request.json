@@ -4,7 +4,8 @@
     "user_id": "usr_99182",
     "event": "checkout_abandoned",
     "target_plan": "Developer Pro ($20/mo)",
-    "total_lifetime_tokens": 352000
+    "total_lifetime_tokens": 352000,
+    "exit_survey": "I could not get it connected to my repository"
   },
   "questions": {
     "offer_type": {

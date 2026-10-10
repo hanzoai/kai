@@ -1,8 +1,8 @@
-# RAG: Semantic Retrieval vs Direct Generation Router
+# RAG: Retrieval Router
 
-Decide whether a user query requires semantic vector DB retrieval, external live web search, or can be answered directly from model weights.
+Decide whether a query needs live web search, internal documents, or no retrieval at all.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -24,20 +24,22 @@ Decide whether a user query requires semantic vector DB retrieval, external live
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `retrieval_route` (choice): `live_web_search`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/17_rag_retrieval_router/request.json
+
+python3 recipes/17_rag_retrieval_router/run.py
+npx tsx recipes/17_rag_retrieval_router/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

@@ -1,8 +1,8 @@
-# Engineering CI/CD: Automated PR Merge Gate
+# Engineering CI/CD: PR Merge Gate
 
-Decide whether a pull request can be auto-merged by CI or requires manual senior engineering review.
+Classify a pull request's merge risk from its title, changed files and test result.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -32,20 +32,22 @@ Decide whether a pull request can be auto-merged by CI or requires manual senior
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `merge_risk` (choice): `safe_auto_merge`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/13_code_review_gate/request.json
+
+python3 recipes/13_code_review_gate/run.py
+npx tsx recipes/13_code_review_gate/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

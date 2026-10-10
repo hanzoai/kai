@@ -1,8 +1,8 @@
-# Product: Dynamic Feature Experimentation Routing
+# Product: Beta Enrollment
 
-Evaluate whether an active user should be enrolled in a bleeding-edge beta feature flag based on usage profile.
+Ask Kai whether a user fits an experimental beta from their usage profile.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -22,20 +22,22 @@ Evaluate whether an active user should be enrolled in a bleeding-edge beta featu
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `enroll_in_beta` (noul): P(true) above 0.5
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/14_feature_flag_routing/request.json
+
+python3 recipes/14_feature_flag_routing/run.py
+npx tsx recipes/14_feature_flag_routing/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

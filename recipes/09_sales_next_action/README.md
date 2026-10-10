@@ -1,8 +1,8 @@
-# Sales: Next Best Action Recommendation
+# Sales: Next Action
 
-Determine the highest-converting sales touchpoint based on prospect interaction history.
+Pick the next sales step for a prospect from their interaction history.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -12,7 +12,8 @@ Determine the highest-converting sales touchpoint based on prospect interaction 
     "history": [
       "downloaded whitepaper on HIPAA compliance with private models",
       "attended webinar on agent security",
-      "created free developer account and tested 50 API queries"
+      "created free developer account and tested 50 API queries",
+      "asked in the webinar Q&A for a live walkthrough with their security team"
     ]
   },
   "questions": {
@@ -29,20 +30,22 @@ Determine the highest-converting sales touchpoint based on prospect interaction 
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `next_action` (choice): `book_demo`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/09_sales_next_action/request.json
+
+python3 recipes/09_sales_next_action/run.py
+npx tsx recipes/09_sales_next_action/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

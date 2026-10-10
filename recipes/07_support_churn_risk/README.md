@@ -1,8 +1,8 @@
-# Customer Support: Real-Time Churn Detection
+# Customer Support: Churn Risk
 
-Identify churn signals in real time during customer support interactions to immediately trigger retention interventions.
+Ask Kai whether a customer's support message says they may leave, and whether it needs a leader's attention.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -29,20 +29,23 @@ Identify churn signals in real time during customer support interactions to imme
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `churn_propensity` (noul): P(true) above 0.5
+- `executive_escalation` (choice): not checked, no obvious answer on this input
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/07_support_churn_risk/request.json
+
+python3 recipes/07_support_churn_risk/run.py
+npx tsx recipes/07_support_churn_risk/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

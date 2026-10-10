@@ -1,8 +1,8 @@
-# Security: API Anomaly & Threat Scoring
+# Security: API Threat Scoring
 
-Score suspicious API traffic patterns for credential stuffing, scraping, or token exfiltration.
+Rate how threatening an IP's API traffic is and pick a firewall response.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -37,20 +37,23 @@ Score suspicious API traffic patterns for credential stuffing, scraping, or toke
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `threat_severity` (score): most probable level 3 `active credential stuffing attack`
+- `mitigation` (choice): not checked, no obvious answer on this input
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/15_security_threat_scoring/request.json
+
+python3 recipes/15_security_threat_scoring/run.py
+npx tsx recipes/15_security_threat_scoring/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.

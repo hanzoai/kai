@@ -1,8 +1,8 @@
-# Commerce: Retention Discount & Promotion Offer
+# Commerce: Checkout Recovery Offer
 
-When an active user considers downgrading or hits payment abandonment, select the right promotional incentive.
+Pick the incentive to offer a user who abandoned checkout, given the reason they left.
 
-## Request Payload (`request.json`)
+## Request (`request.json`)
 
 ```json
 {
@@ -11,7 +11,8 @@ When an active user considers downgrading or hits payment abandonment, select th
     "user_id": "usr_99182",
     "event": "checkout_abandoned",
     "target_plan": "Developer Pro ($20/mo)",
-    "total_lifetime_tokens": 352000
+    "total_lifetime_tokens": 352000,
+    "exit_survey": "I could not get it connected to my repository"
   },
   "questions": {
     "offer_type": {
@@ -27,20 +28,22 @@ When an active user considers downgrading or hits payment abandonment, select th
 }
 ```
 
-## Run with cURL
+## Checked answers (`expect.json`)
+
+- `offer_type` (choice): `personal_onboarding`
+
+## Run
+
+From the repository root, after `pip install -r requirements.txt` and `npm install`:
+
 ```bash
-curl -X POST https://api.hanzo.ai/v1/decisions \
+curl -sS --fail-with-body https://api.hanzo.ai/v1/decisions \
   -H "Authorization: Bearer $HANZO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @request.json
+  -d @recipes/11_commerce_next_best_offer/request.json
+
+python3 recipes/11_commerce_next_best_offer/run.py
+npx tsx recipes/11_commerce_next_best_offer/run.ts
 ```
 
-## Run with Python
-```bash
-python3 run.py
-```
-
-## Run with TypeScript
-```bash
-npx tsx run.ts
-```
+`run.py` and `run.ts` print every answer and exit 1 when a checked answer is wrong.
