@@ -1,5 +1,4 @@
-// Raw fetch example without external dependencies against Hanzo Decisions API
-// Supports both Kai ("kai", "hanzoai/kai-1") and Jev ("typesafe/jev-1.13")
+// The same call over plain fetch, for code that does not take the SDK.
 const apiKey = process.env.HANZO_API_KEY;
 if (!apiKey) {
   console.error('Error: HANZO_API_KEY environment variable is required');
@@ -39,4 +38,4 @@ async function runDecision() {
   console.log('Result:', data.answers);
 }
 
-runDecision().catch(console.error);
+await runDecision();

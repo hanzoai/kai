@@ -1,5 +1,4 @@
-# Raw HTTP client using requests against Hanzo Decisions API
-# Supports both Kai ("kai", "hanzoai/kai-1") and Jev ("typesafe/jev-1.13")
+# The same call over plain HTTP with requests, for code that does not take the SDK.
 import os
 import requests
 
@@ -26,7 +25,7 @@ payload = {
     }
 }
 
-resp = requests.post(url, headers={"Authorization": f"Bearer {api_key}"}, json=payload)
+resp = requests.post(url, headers={"Authorization": f"Bearer {api_key}"}, json=payload, timeout=30)
 resp.raise_for_status()
 data = resp.json()
 

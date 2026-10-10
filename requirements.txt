@@ -1,0 +1,2 @@
+hanzoai==8.5.704
+requests

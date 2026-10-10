@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "hanzoai": "8.5.704"
+  },
+  "devDependencies": {
+    "tsx": "4.23.15"
+  }
+}
