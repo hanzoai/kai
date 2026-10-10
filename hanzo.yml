@@ -1,0 +1,21 @@
+# Read by hanzoai/ci build.yml, which .github/workflows/cicd.yml calls on every
+# push to main, every pull request and once a day, on our own runners.
+#
+# No images: what this repository owes is the gate. It runs every example and
+# recipe against api.hanzo.ai (test.sh) and fails when one errors or answers a
+# checked question wrongly.
+#
+# The API key is sealed in KMS at /ci/kai (prod) for this repository alone
+# (hanzoai/universe kms-grants.yaml). The step reads it with the identity token
+# the pipeline's KMS login exports as HANZO_API_TOKEN, and masks it before use.
+# A pull request from a fork runs without credentials, so it stops here.
+test:
+  - name: examples
+    run: |
+      set -euo pipefail
+      : "${HANZO_API_TOKEN:?no CI identity: the KMS login did not run, so /ci/kai cannot be read}"
+      HANZO_API_KEY=$(curl -fsS --max-time 30 -H "Authorization: Bearer $HANZO_API_TOKEN" \
+        "https://api.hanzo.ai/v1/kms/secrets/ci/kai/HANZO_API_KEY?env=prod" | jq -r '.value // empty')
+      [ -n "$HANZO_API_KEY" ] || { echo "::error::KMS holds no HANZO_API_KEY at /ci/kai (prod)"; exit 1; }
+      echo "::add-mask::$HANZO_API_KEY"
+      HANZO_API_KEY="$HANZO_API_KEY" ./test.sh
