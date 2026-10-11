@@ -62,7 +62,23 @@ Facts below were measured against production on 2026-10-09 (`routing.checkpoint`
   acceptable options for choice, of level indices for score, a boolean for noul; a question
   absent from it has no obvious answer and is printed only), `run.py`, `run.ts` (identical
   across recipes), `README.md` (its request and checked answers copy the two JSON files).
+- `examples/claude-code/`: a Claude Code plugin (`.claude-plugin/plugin.json`, `hooks/hooks.json`,
+  `hooks/kai.mjs`, `skills/kai/SKILL.md`). `.claude-plugin/marketplace.json` at the root makes
+  the repo the marketplace `kai` (`/plugin install kai@kai`), not `hanzo`, so it cannot collide
+  with another Hanzo marketplace a user holds (Claude Code keeps one marketplace per name).
+  One dependency-free Node file runs a `Stop` hook (send back an unverified "done") and a
+  `PreToolUse` hook (ask before an action that cannot be undone). Rules in code decide first;
+  Kai only tightens; the hooks fail open and never allow; the default mode `shadow` logs and
+  changes nothing; `on` acts. Options reach the hook as `CLAUDE_PLUGIN_OPTION_HANZO_API_KEY` and
+  `CLAUDE_PLUGIN_OPTION_MODE` (keys uppercased); a hand install sets `HANZO_API_KEY` and
+  `KAI_HOOK_MODE`. Log: `~/.hanzo/kai-hook/decisions.jsonl` (0700/0600), numbers and verdicts
+  only. A state sent to Kai is at most 3,000 characters of JSON, redacted; only the
+  transcript's last 8 MiB is read. `test/kai.test.mjs` runs it offline against a loopback
+  stand-in (`node --test`); `claude plugin validate examples/claude-code` and `claude plugin
+  validate .` pass. kai-1.2 reads "done", "verified" and "risky" near chance, so `on` is not
+  recommended until a trained version ships (README, Claude Code plugin).
 - `test.sh`: runs everything live, prints `<language>: N passed, M failed`, exits 1 on any failure.
+  The plugin's tests run offline in it, with an environment built by the test, never the key.
 - `hanzo.yml` + `.github/workflows/cicd.yml`: hanzoai/ci runs `test.sh` on our runners on push,
   pull request and daily, with the key read from KMS `/ci/kai` `HANZO_API_KEY` (prod).
 - `SUBMIT.md`: the systemonemodels.org "List an example" form contents.

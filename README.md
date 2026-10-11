@@ -185,6 +185,93 @@ a dash means none does. Python and TypeScript give the same answers.
 | [17 RAG retrieval router](./recipes/17_rag_retrieval_router/) | Intent and model routing | choice | pass |
 | [18 Invoice consistency](./recipes/18_structured_data_validation/) | — | noul, score | fail: `confidence_rating` level 2 |
 
+## Claude Code plugin
+
+[`examples/claude-code`](./examples/claude-code/) is a Claude Code plugin: a `Stop`
+hook, a `PreToolUse` hook, and the `kai` skill
+([`SKILL.md`](./examples/claude-code/skills/kai/SKILL.md): when and how an agent should
+ask Kai). It needs Claude Code 2.1.271 or later and `node` on the `PATH` (tested with
+Node.js 24).
+
+**Kai does not yet judge agent work reliably.** Its zero-shot answers to "is this
+done", "is this verified" and "is this action risky" are near chance: on a set of 20
+agent stops its "done" answer was right 8 times where a fixed rule table was right
+16, it scored read-only calls as writes, and it read successful tool results as
+failures. Recipes 03, 04 and 05 above, which ask such questions, fail too. So the
+plugin is built to collect evidence, not to improve stops:
+
+- Rules in code decide first. Kai is asked only where they leave the question open.
+- Kai can only tighten: send a turn back, or ask you before an action. Neither hook
+  allows anything, and your own permission rules still apply.
+- The default mode, `shadow`, asks Kai, logs its answers, shows a one-line notice of
+  what the hook would have done, and changes nothing.
+
+Do not switch to `on` expecting better stops until a Kai version trained for these
+questions ships.
+
+What each hook does in `on`:
+
+- **Stop.** When the turn changed files and no test, build or lint passed after the
+  last change (read from the transcript), Kai is asked whether the closing message
+  reports the work done, whether a check verified it, and whether a check would be a
+  meaningful way to verify it. Done at 0.70 or more, verified under 0.50 and a check
+  applying at 0.50 or more send the turn back once to run a check, at most three
+  times a session.
+- **PreToolUse.** For shell commands, and for writes outside the project or to
+  `.env`, keys and credential directories: a fixed list (`rm -rf`, force push,
+  `git reset --hard`, `git checkout -- .`, `git clean -f`, `DROP TABLE`,
+  `terraform destroy`, `curl … | sh`, and a few more in `hooks/kai.mjs`) asks you to
+  confirm whatever Kai says. Kai is asked whether the action is irreversible or
+  reaches beyond this machine; either answer at 0.90 or more asks too. Commands that
+  only read or run the project's checks, and writes inside the project, never call
+  Kai.
+
+Both hooks fail open: no key, an error, a timeout (8 s for `Stop`, 1.5 s for
+`PreToolUse`) or an event they do not read leaves Claude Code as it is without them.
+
+Install:
+
+```text
+/plugin marketplace add hanzoai/kai
+/plugin install kai@kai
+```
+
+Claude Code asks for the API key, which it keeps in secure storage, and the mode.
+Leave the key empty to use `HANZO_API_KEY` from the environment Claude Code starts
+in. `KAI_HOOK_MODE=shadow|on|off` in that environment overrides the mode.
+
+**What is sent.** Only to `https://api.hanzo.ai/v1/decisions` (or `KAI_URL`, which
+must be https, or http on loopback), in a state of at most 3,000 characters, with
+tokens, keys and passwords of common shapes and the key in use redacted. `Stop`
+sends your last prompt, the closing message, up to five changed file paths, and the
+last two checks' commands and the ends of their output. `PreToolUse` sends the
+command or file path, the working directory and the permission mode.
+
+**What is logged.** `~/.hanzo/kai-hook/decisions.jsonl` (directory 0700, file 0600), a
+line for each Kai call: time, hook, a hash of the session id, mode, tool name, model,
+the probabilities, the verdict (`send`, or `floor` and `hold`), milliseconds, or the
+error.
+Never prompt, command or file text, never the key. To read it:
+
+```bash
+# Each stop Kai was asked about, and whether it sent (or in shadow would have sent) it back
+jq -c 'select(.hook == "stop") | {at, mode, answers, send}' ~/.hanzo/kai-hook/decisions.jsonl
+# Gate calls by verdict
+jq -s 'map(select(.hook == "gate")) | group_by(.hold) | map({hold: .[0].hold, calls: length})' ~/.hanzo/kai-hook/decisions.jsonl
+```
+
+Uninstall:
+
+```text
+/plugin uninstall kai@kai
+/plugin marketplace remove kai
+```
+
+then `rm -rf ~/.hanzo/kai-hook`.
+
+`node --test examples/claude-code/test/kai.test.mjs` runs the hooks against a stand-in
+for Kai on 127.0.0.1, with no network and no key; `test.sh` runs it too.
+
 ## Support
 
 - Maintained by Hanzo AI Inc.

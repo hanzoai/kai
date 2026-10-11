@@ -1,0 +1,15 @@
+{
+  "name": "kai",
+  "owner": {
+    "name": "Hanzo AI",
+    "url": "https://hanzo.ai"
+  },
+  "description": "Kai plugins for coding agents.",
+  "plugins": [
+    {
+      "name": "kai",
+      "source": "./examples/claude-code",
+      "description": "Kai hooks for Claude Code (Stop and PreToolUse) and the kai skill. Shadow mode by default: logs, changes nothing."
+    }
+  ]
+}

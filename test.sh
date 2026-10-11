@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Runs every example and recipe against api.hanzo.ai and prints a count per language.
 # An example passes when it answers; a recipe passes when every answer in its
-# expect.json is right. Needs HANZO_API_KEY, curl, jq, uv, node, go and cargo.
+# expect.json is right; the Claude Code plugin's tests run offline. Needs
+# HANZO_API_KEY, curl, jq, uv, node, go and cargo.
 set -uo pipefail
 : "${HANZO_API_KEY:?set HANZO_API_KEY}"
 cd "$(dirname "$0")"
@@ -30,6 +31,9 @@ check examples/go go -C examples/go run .
 count go
 check examples/rust cargo run -q --manifest-path examples/rust/Cargo.toml
 count rust
+# Offline: the plugin's hooks against a stand-in for Kai on 127.0.0.1, never the key above.
+check examples/claude-code node --test examples/claude-code/test/kai.test.mjs
+count claude-code
 
 printf '\n%s' "$summary"
 [ "$failed" -eq 0 ]

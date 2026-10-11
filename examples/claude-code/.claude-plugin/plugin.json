@@ -1,0 +1,29 @@
+{
+  "name": "kai",
+  "description": "Kai in the coding loop: a Stop hook that can send an unverified 'done' back to run a check, a PreToolUse hook that can ask before an action that cannot be undone, and the kai skill for asking typed decisions. Both hooks start in shadow mode: they log what they would have done and change nothing.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Hanzo AI",
+    "url": "https://hanzo.ai"
+  },
+  "homepage": "https://github.com/hanzoai/kai",
+  "repository": "https://github.com/hanzoai/kai",
+  "keywords": ["kai", "decisions", "hooks", "hanzo"],
+  "userConfig": {
+    "hanzo_api_key": {
+      "type": "string",
+      "title": "Hanzo API key",
+      "description": "Without it both hooks do nothing. HANZO_API_KEY in the environment works too.",
+      "sensitive": true,
+      "required": false
+    },
+    "mode": {
+      "type": "string",
+      "title": "Mode",
+      "description": "shadow logs what the hooks would do and changes nothing; on lets them act; off turns them off. KAI_HOOK_MODE overrides it.",
+      "options": ["shadow", "on", "off"],
+      "default": "shadow",
+      "required": false
+    }
+  }
+}
