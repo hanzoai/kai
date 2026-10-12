@@ -185,6 +185,40 @@ a dash means none does. Python and TypeScript give the same answers.
 | [17 RAG retrieval router](./recipes/17_rag_retrieval_router/) | Intent and model routing | choice | pass |
 | [18 Invoice consistency](./recipes/18_structured_data_validation/) | — | noul, score | fail: `confidence_rating` level 2 |
 
+## Install the Hanzo CLI and wrap your coding tools
+
+One command installs the CLI, and one more runs the coding tool you already use through
+Hanzo's cloud:
+
+```bash
+curl -fsSL hanzo.sh | sh          # hanzo, the MCP server, dev and zt into ~/.local/bin, checksum-verified
+hanzo login                       # sign in through Hanzo IAM
+hanzo code claude                 # or: codex, cursor, agy, dev (the default)
+hanzo code claude "fix the failing test"   # a trailing task runs headless
+```
+
+`curl -fsSL hanzo.sh/cli | sh` installs the CLI alone and `curl -fsSL hanzo.sh/mcp | sh` the MCP
+server alone; `-d DIR` picks the install directory and re-running upgrades. The installer
+runs under `sh` and `bash`, downloads one prebuilt native binary per tool and verifies its
+sha256; it builds nothing and needs no package manager.
+
+`hanzo code` is the one wrapper for all five backends (`dev`, `claude`, `codex`, `agy`,
+`cursor`; `--claude`, `--codex`, `--agy` and `--cursor` are the same choice as flags). For
+the session it:
+
+- attaches the Hanzo MCP toolset (`--no-mcp` leaves it off);
+- sends the backend's model calls through `api.hanzo.ai`, where Hanzo meters them
+  (`--no-route` keeps the backend's own model account);
+- streams the session to Hanzo's cloud dashboard (mission control) while you are signed
+  in (`--no-link` never streams).
+
+Check what a signed-in account has used with `hanzo usage summary`.
+
+What Kai adds to a wrapped tool today is the decisions API above and, for Claude Code, the
+plugin below. No speed or cost figure for a wrapped session is published here: it is
+measured, per session, from the usage the cloud records, and appears on the dashboard
+once that measurement is in.
+
 ## Claude Code plugin
 
 [`examples/claude-code`](./examples/claude-code/) is a Claude Code plugin: a `Stop`
