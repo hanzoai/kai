@@ -15,8 +15,10 @@ reproduced the same day on api.hanzo.ai (`run.py`).
 Each directory holds the program (`*@1.json`), `evidence.json`, the recorded run
 (`recorded.json`: every node's output, Kai's full distributions, ranking, flips, gate rulings,
 bias findings, revisions, the replay manifest and the package's SHA-256), and for `apu` the
-changes it refreshes on (`changes/`) and the `/v1/decisions` body of its program-scope questions
-(`request.json`).
+changes it refreshes on (`changes/`), the `/v1/decisions` body of its program-scope questions
+(`request.json`), the DDT Decision record the program is bound from (`ddt.json`) and the DDT
+records a run files (`ddt.export.json`: one Evaluation Run with its input and output hashes, the
+readiness ruling and bias findings, the Evidence read, Action drafts; never a Commitment).
 
 ## jltv: SysML v2 trade
 

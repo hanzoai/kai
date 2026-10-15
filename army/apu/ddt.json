@@ -1,0 +1,32 @@
+{
+  "id": "DEC-SPH-0412",
+  "schemaVersion": "DDT-1.0",
+  "program": "apu.select@1",
+  "lifecycleState": "IN_ANALYSIS",
+  "decisionClassPolicyId": "DCP_CONCEPT_STRATEGY_HIGH_STAKES",
+  "objectiveRefs": ["OBJ_SILENT_WATCH", "OBJ_SUSTAINMENT_BURDEN", "OBJ_COST", "OBJ_MASS"],
+  "options": ["A1_INTEGRATED_APU", "A2_BATTERY_ONLY", "A3_TRAILER_GENSET"],
+  "constraints": ["silent_watch", "thermal_qualified"],
+  "assumptions": [
+    {"id": "A2_WATCH_H", "value": 8.1, "range": [6.5, 9.0], "evidence": "techdata://sph/tsb/22"},
+    {"id": "BATTERY_MTTR_H", "value": 3, "range": [2, 8], "evidence": "techdata://sph/tsb/22"},
+    {"id": "BATTERY_USD_PER_KWH", "value": 520, "range": [380, 640], "evidence": "plm://sph/BOM/top@R2026.08"}
+  ],
+  "variables": {
+    "best": "choice",
+    "missing": "predicate",
+    "conflict": "predicate",
+    "anchor": "predicate"
+  },
+  "evidence": ["ddt:DEC-SPH-0412/need", "run://RUN_THERMAL_SWEEP_0007", "techdata://sph/tsb/22", "plm://sph/BOM/top@R2026.08"],
+  "biasChecks": ["ACTDEF_ANCHORING_CONTROL_REVIEW", "ACTDEF_PREMORTEM_WORKSHOP"],
+  "agentPermissions": {
+    "mayCreate": ["Evaluation Run", "Evidence", "Action"],
+    "mayNotCreate": ["DecisionCommitment"],
+    "mayNotChange": ["lifecycleState"]
+  },
+  "refresh": {
+    "on": ["run://*", "techdata://sph/tsb/*", "plm://sph/BOM/*"],
+    "recompute": "affected_only"
+  }
+}
