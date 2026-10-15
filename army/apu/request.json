@@ -1,0 +1,72 @@
+{
+  "model": "kai",
+  "state": {
+    "charter": {
+      "decision": "DEC-SPH-0412",
+      "need": "Select the auxiliary power source for the vehicle concept: at least 8 hours of silent watch at 3.5 kW and 49 C ambient, with the lowest field-maintenance burden at acceptable cost and mass.",
+      "options": {
+        "A1": "integrated APU",
+        "A2": "battery-only pack, 46 kWh",
+        "A3": "trailer genset"
+      },
+      "gate": "Before the concept gate every option needs a completed thermal qualification run and a reliability review of its current technical data."
+    },
+    "thermal": {
+      "A1": "RUN_THERMAL_SWEEP_0007 (thermal model v4.2, sealed; 3.5 kW load, 49 C ambient, 8 h required): complete. 10.0 h of silent watch, 6 C margin. Pass.",
+      "A2": "RUN_THERMAL_SWEEP_0007 (thermal model v4.2, sealed; 3.5 kW load, 49 C ambient, 8 h required): complete. 8.1 h of silent watch, 3 C margin. Pass.",
+      "A3": "RUN_THERMAL_SWEEP_0007 (thermal model v4.2, sealed; 3.5 kW load, 49 C ambient, 8 h required): complete. 24.0 h of silent watch, 9 C margin. Pass."
+    },
+    "techdata": {
+      "bulletin": "TSB-22",
+      "revision": "A",
+      "component": "A2 battery-only pack, 46 kWh",
+      "silent_watch_h_end_of_life": 8.1,
+      "capacity_fade_pct": 0,
+      "mtbf_h": 6000,
+      "mttr_h": 3,
+      "basis": "supplier qualification data, consistent with RUN_THERMAL_SWEEP_0007",
+      "review": "complete"
+    },
+    "bom": {
+      "baseline": "R2026.08",
+      "A1": {
+        "mass_lb": 380,
+        "unit_cost_kusd": 145
+      },
+      "A2": {
+        "mass_lb": 920,
+        "integration_kusd": 61,
+        "pack_kwh": 46,
+        "usd_per_kwh": 520
+      },
+      "A3": {
+        "mass_lb": 1450,
+        "unit_cost_kusd": 38,
+        "note": "towed"
+      }
+    }
+  },
+  "questions": {
+    "missing": {
+      "type": "noul",
+      "instructions": "Is a test result or review that the charter requires missing for any option?"
+    },
+    "conflict": {
+      "type": "noul",
+      "instructions": "Does the technical data disagree with the thermal qualification result?"
+    },
+    "best": {
+      "type": "choice",
+      "instructions": "Which option best meets the charter: at least 8 hours of silent watch with the lowest field-maintenance burden?",
+      "criteria": {
+        "A1": "integrated APU",
+        "A2": "battery-only pack",
+        "A3": "trailer genset"
+      }
+    },
+    "anchor": {
+      "type": "noul",
+      "instructions": "Does the charter favor one option before the options were measured?"
+    }
+  }
+}

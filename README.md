@@ -13,6 +13,11 @@ the answers you declared, and writes no text.
 Everything below was measured against production on 2026-10-09, with `routing.checkpoint`
 reading `kai-1.2`.
 
+## Army demonstrations
+
+[`army/`](army/): two ground-vehicle decisions run as programs with Kai answering live, a SysML v2
+trade (`army/jltv`) and a DDT readiness gate with refresh (`army/apu`), with every recorded output.
+
 ## Questions and answers
 
 | `type` | you send | Kai returns in `answers.<name>` |

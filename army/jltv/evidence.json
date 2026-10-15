@@ -1,0 +1,10 @@
+{
+  "release": {
+    "source": "O2",
+    "claim": "fuel economy improved by more than 20%"
+  },
+  "status": {
+    "diesel": "LTV::Diesel: Fielded JLTV powertrain: Gale Banks Engineering 866T V8 turbodiesel, based on the GM Duramax L5P, and an Allison 2500SP automatic (W1).",
+    "hybrid": "LTV::Hybrid (since 2022-01-25, O2): Diesel-electric hybrid eJLTV. LTV::maturity: The eJLTV was a demonstrator with no orders when unveiled (B1)."
+  }
+}

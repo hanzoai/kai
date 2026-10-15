@@ -1,0 +1,330 @@
+{
+  "id": "apu.select",
+  "version": 1,
+  "description": "Auxiliary power for a representative ground vehicle (DDT decision DEC-SPH-0412): an integrated APU, a battery-only pack or a trailer genset, for at least 8 h of silent watch at 3.5 kW and 49 C ambient with the lowest field-maintenance burden. The evidence is constructed for the demonstration, not program data; each piece names the DDT object it stands for. Weights are an analyst's example. The readiness verdict is DDT's deterministic gate (base); Thermal qualification is read from the sealed run, not asked of Kai. Kai's checks may tighten the gate, never loosen it. No node commits: the Chief Engineer does, in DDT, after the gate.",
+  "options": [
+    {
+      "id": "A1",
+      "label": "integrated APU",
+      "attributes": {
+        "watch": 10.0,
+        "qual": 1,
+        "bat": 0,
+        "mtbf": 2100,
+        "mttr": 6,
+        "mass": 380,
+        "base_cost": 145,
+        "kwh": 0
+      }
+    },
+    {
+      "id": "A2",
+      "label": "battery-only pack, 46 kWh",
+      "attributes": {
+        "watch": 0,
+        "qual": 0,
+        "bat": 1,
+        "mtbf": 6000,
+        "mttr": 0,
+        "mass": 920,
+        "base_cost": 61,
+        "kwh": 46
+      }
+    },
+    {
+      "id": "A3",
+      "label": "trailer genset",
+      "attributes": {
+        "watch": 24.0,
+        "qual": 1,
+        "bat": 0,
+        "mtbf": 1500,
+        "mttr": 4,
+        "mass": 1450,
+        "base_cost": 38,
+        "kwh": 0
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "id": "endurance",
+      "node": "endurance",
+      "unit": "h",
+      "description": "silent watch at 3.5 kW and 49 C: RUN_THERMAL_SWEEP_0007, the battery pack's at end of life per its bulletin"
+    },
+    {
+      "id": "burden",
+      "node": "burden",
+      "unit": "h per 1,000 h",
+      "description": "field-maintenance hours per 1,000 operating hours: MTTR x 1,000 / MTBF"
+    },
+    {
+      "id": "cost",
+      "node": "cost",
+      "unit": "thousand USD",
+      "description": "unit cost (PLM BOM R2026.08)"
+    },
+    {
+      "id": "mass",
+      "node": "mass",
+      "unit": "lb",
+      "description": "mass added or towed"
+    },
+    {
+      "id": "qualified",
+      "node": "qualified",
+      "description": "1 when the sealed thermal run records the option's qualification as passed"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "OBJ_SILENT_WATCH",
+      "metric": "endurance",
+      "weight": 0.15,
+      "direction": "max"
+    },
+    {
+      "id": "OBJ_SUSTAINMENT_BURDEN",
+      "metric": "burden",
+      "weight": 0.35,
+      "direction": "min"
+    },
+    {
+      "id": "OBJ_COST",
+      "metric": "cost",
+      "weight": 0.2,
+      "direction": "min"
+    },
+    {
+      "id": "OBJ_MASS",
+      "metric": "mass",
+      "weight": 0.1,
+      "direction": "min"
+    }
+  ],
+  "constraints": [
+    {
+      "id": "silent_watch",
+      "metric": "endurance",
+      "op": ">=",
+      "bound": 8
+    },
+    {
+      "id": "thermal_qualified",
+      "metric": "qualified",
+      "op": ">=",
+      "bound": 1
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "A2_WATCH_H",
+      "value": 8.1,
+      "range": [
+        6.5,
+        9.0
+      ],
+      "confidence": 0.7,
+      "evidence": "techdata",
+      "description": "The battery pack's silent watch at 3.5 kW and 49 C at end of life, from its technical service bulletin's current revision."
+    },
+    {
+      "id": "A2_QUALIFIED",
+      "value": 1,
+      "range": [
+        0,
+        1
+      ],
+      "confidence": 0.9,
+      "evidence": "thermal",
+      "description": "1 when the sealed thermal run records A2's qualification as passed, else 0."
+    },
+    {
+      "id": "BATTERY_MTTR_H",
+      "value": 3,
+      "range": [
+        2,
+        8
+      ],
+      "confidence": 0.7,
+      "evidence": "techdata",
+      "description": "Hours to repair the battery pack in the field, from its technical service bulletin's current revision."
+    },
+    {
+      "id": "BATTERY_USD_PER_KWH",
+      "value": 520,
+      "range": [
+        380,
+        640
+      ],
+      "confidence": 0.6,
+      "evidence": "bom",
+      "description": "Battery pack price per kWh in the BOM's cost basis."
+    }
+  ],
+  "bias": [
+    {
+      "id": "anchoring",
+      "check": "Does the charter favor one option before the options were measured?",
+      "node": "anchor"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "charter",
+      "uri": "ddt:DEC-SPH-0412/need",
+      "description": "the Chief Engineer's charter: scope, objectives, the gate's requirements"
+    },
+    {
+      "id": "thermal",
+      "uri": "run://RUN_THERMAL_SWEEP_0007",
+      "description": "the sealed thermal Evaluation Run, one result per option, keyed by option"
+    },
+    {
+      "id": "techdata",
+      "uri": "techdata://sph/tsb/22",
+      "description": "the battery pack's technical service bulletin: end-of-life endurance and repair time"
+    },
+    {
+      "id": "bom",
+      "uri": "plm://sph/BOM/top@R2026.08",
+      "description": "the released BOM's masses and prices"
+    },
+    {
+      "id": "base",
+      "uri": "ddt:DCP_CONCEPT_STRATEGY_HIGH_STAKES/readiness",
+      "description": "DDT's deterministic readiness verdict for the concept gate"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "endurance",
+      "kind": "expr",
+      "expr": "watch * (1 - bat) + A2_WATCH_H * bat",
+      "inputs": [
+        "A2_WATCH_H"
+      ]
+    },
+    {
+      "id": "burden",
+      "kind": "expr",
+      "inputs": [
+        "BATTERY_MTTR_H"
+      ],
+      "expr": "(mttr * (1 - bat) + BATTERY_MTTR_H * bat) * 1000 / mtbf"
+    },
+    {
+      "id": "cost",
+      "kind": "expr",
+      "inputs": [
+        "BATTERY_USD_PER_KWH"
+      ],
+      "expr": "base_cost + kwh * BATTERY_USD_PER_KWH / 1000"
+    },
+    {
+      "id": "mass",
+      "kind": "expr",
+      "expr": "mass"
+    },
+    {
+      "id": "qualified",
+      "kind": "expr",
+      "inputs": [
+        "A2_QUALIFIED"
+      ],
+      "expr": "qual * (1 - bat) + A2_QUALIFIED * bat"
+    },
+    {
+      "id": "missing",
+      "kind": "kai",
+      "inputs": [
+        "charter",
+        "thermal",
+        "techdata",
+        "bom"
+      ],
+      "model": "kai",
+      "question": {
+        "type": "noul",
+        "instructions": "Is a test result or review that the charter requires missing for any option?"
+      }
+    },
+    {
+      "id": "conflict",
+      "kind": "kai",
+      "inputs": [
+        "charter",
+        "thermal",
+        "techdata",
+        "bom"
+      ],
+      "model": "kai",
+      "question": {
+        "type": "noul",
+        "instructions": "Does the technical data disagree with the thermal qualification result?"
+      }
+    },
+    {
+      "id": "best",
+      "kind": "kai",
+      "inputs": [
+        "charter",
+        "thermal",
+        "techdata",
+        "bom"
+      ],
+      "model": "kai",
+      "question": {
+        "type": "choice",
+        "instructions": "Which option best meets the charter: at least 8 hours of silent watch with the lowest field-maintenance burden?",
+        "criteria": {
+          "A1": "integrated APU",
+          "A2": "battery-only pack",
+          "A3": "trailer genset"
+        }
+      }
+    },
+    {
+      "id": "anchor",
+      "kind": "kai",
+      "inputs": [
+        "charter",
+        "thermal",
+        "techdata",
+        "bom"
+      ],
+      "model": "kai",
+      "question": {
+        "type": "noul",
+        "instructions": "Does the charter favor one option before the options were measured?"
+      }
+    },
+    {
+      "id": "readiness",
+      "kind": "policy",
+      "inputs": [
+        "missing",
+        "conflict",
+        "base"
+      ],
+      "mode": "enforced",
+      "escalate": {
+        "missing": "ask",
+        "conflict": "ask"
+      },
+      "thresholds": {
+        "missing": 0.5,
+        "conflict": 0.5
+      },
+      "base": "base"
+    }
+  ],
+  "refresh": {
+    "on": [
+      "thermal",
+      "techdata",
+      "bom"
+    ]
+  }
+}

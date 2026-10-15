@@ -1,0 +1,709 @@
+[
+  {
+    "name": "run",
+    "ran": [
+      "fuel",
+      "weight",
+      "field",
+      "proven",
+      "lift",
+      "mature",
+      "brief",
+      "anchor",
+      "approve"
+    ],
+    "ms": 516.822696,
+    "package": {
+      "program": {
+        "id": "ltv.trade",
+        "version": 1,
+        "description": "Powertrain trade for a light tactical vehicle of the JLTV class, over the cited model demo/ltv.sysml: the fielded diesel against the eJLTV hybrid. Hybrid figures are the model's (source keys in its header); the diesel is the baseline they are measured from, so its gains are 0. Requirement attributes are 1 where the model records `satisfy <requirement> by trade.<option>`. Weights are an analyst's example.",
+        "options": [
+          {
+            "id": "diesel",
+            "label": "fielded diesel: 866T V8 turbodiesel, Allison 2500SP",
+            "attributes": {
+              "economy": 0.0,
+              "added": 0.0,
+              "silent": 0.0,
+              "payload": 1.0,
+              "reliability": 1.0,
+              "transport": 1.0,
+              "power": 0.0,
+              "stealth": 0.0
+            }
+          },
+          {
+            "id": "hybrid",
+            "label": "eJLTV diesel-electric hybrid",
+            "attributes": {
+              "economy": 20.0,
+              "added": 1000.0,
+              "silent": 30.0,
+              "payload": 0.0,
+              "reliability": 0.0,
+              "transport": 1.0,
+              "power": 1.0,
+              "stealth": 1.0
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "id": "fuel",
+            "node": "fuel",
+            "unit": "%",
+            "description": "fuel economy gain over the fielded diesel that holds on the duty cycle (O2)"
+          },
+          {
+            "id": "weight",
+            "node": "weight",
+            "unit": "lb",
+            "description": "curb weight added (J1)"
+          },
+          {
+            "id": "field",
+            "node": "field",
+            "description": "R5 export power and R6 silent drive and watch, satisfied"
+          },
+          {
+            "id": "proven",
+            "node": "proven",
+            "description": "R1 payload and R2 reliability, satisfied"
+          },
+          {
+            "id": "lift",
+            "node": "lift",
+            "description": "R4 air transport, satisfied"
+          },
+          {
+            "id": "mature",
+            "node": "mature",
+            "description": "P(fielded and in production)"
+          }
+        ],
+        "objectives": [
+          {
+            "id": "economy",
+            "metric": "fuel",
+            "weight": 0.2,
+            "direction": "max"
+          },
+          {
+            "id": "mass",
+            "metric": "weight",
+            "weight": 0.2,
+            "direction": "min"
+          },
+          {
+            "id": "capability",
+            "metric": "field",
+            "weight": 0.2,
+            "direction": "max"
+          },
+          {
+            "id": "record",
+            "metric": "proven",
+            "weight": 0.2,
+            "direction": "max"
+          },
+          {
+            "id": "maturity",
+            "metric": "mature",
+            "weight": 0.2,
+            "direction": "max"
+          }
+        ],
+        "constraints": [
+          {
+            "id": "airlift",
+            "metric": "lift",
+            "op": ">=",
+            "bound": 1.0
+          }
+        ],
+        "assumptions": [
+          {
+            "id": "cycle",
+            "value": 1.0,
+            "range": [
+              0.0,
+              1.0
+            ],
+            "confidence": 0.5,
+            "evidence": "release",
+            "description": "The share of the hybrid's >20% fuel economy gain (O2, a company figure, not an Army test) that holds on the Army duty cycle. Confidence is the analyst's."
+          }
+        ],
+        "bias": [
+          {
+            "id": "anchoring",
+            "check": "Was the fielded diesel treated as the answer before the options were measured?",
+            "node": "anchor"
+          }
+        ],
+        "evidence": [
+          {
+            "id": "model",
+            "uri": "file:demo/ltv.sysml",
+            "description": "the cited SysML v2 model"
+          },
+          {
+            "id": "release",
+            "uri": "https://oshkoshdefense.com/oshkosh-defense-unveils-first-ever-silent-drive-hybrid-electric-jltv/",
+            "description": "O2, the source of the fuel economy figure"
+          },
+          {
+            "id": "status",
+            "uri": "sysml:LTV::Diesel,LTV::Hybrid,LTV::maturity",
+            "description": "each option's status in the model, keyed by option: its definition's doc and the concerns that threaten it"
+          }
+        ],
+        "nodes": [
+          {
+            "id": "fuel",
+            "inputs": [
+              "cycle"
+            ],
+            "kind": "expr",
+            "expr": "economy * cycle"
+          },
+          {
+            "id": "weight",
+            "kind": "expr",
+            "expr": "added"
+          },
+          {
+            "id": "field",
+            "kind": "expr",
+            "expr": "power + stealth"
+          },
+          {
+            "id": "proven",
+            "kind": "expr",
+            "expr": "payload + reliability"
+          },
+          {
+            "id": "lift",
+            "kind": "expr",
+            "expr": "transport"
+          },
+          {
+            "id": "mature",
+            "inputs": [
+              "status"
+            ],
+            "kind": "kai",
+            "model": "kai",
+            "question": {
+              "type": "noul",
+              "instructions": "Is this powertrain fielded and in production, rather than a demonstrator?"
+            },
+            "scope": "option"
+          },
+          {
+            "id": "brief",
+            "inputs": [
+              "model"
+            ],
+            "kind": "zen",
+            "prompt": "Summarize the trade for a decision brief. Cite the source key for every figure; add no figure the model does not hold."
+          },
+          {
+            "id": "anchor",
+            "inputs": [
+              "brief"
+            ],
+            "kind": "kai",
+            "model": "kai",
+            "question": {
+              "type": "noul",
+              "instructions": "Does the brief treat the fielded diesel as the answer before weighing the options?"
+            },
+            "scope": "program"
+          },
+          {
+            "id": "approve",
+            "inputs": [
+              "fuel",
+              "mature"
+            ],
+            "kind": "human",
+            "role": "program manager"
+          }
+        ],
+        "refresh": {
+          "on": [
+            "model"
+          ]
+        }
+      },
+      "inputs": {
+        "program": "sha256:aab907a1ee6d5fd301948fcf34a62d746aa8dedcb068436be46ff9cb4d9561ad",
+        "options": "sha256:eba6be7fbd24c082fd2d7ca2f26e25b1bc72b89db2c631ae55d412bd4498a7e6",
+        "evidence": {
+          "model": "sha256:9c3f72a9d4303526cc78caba3bf7256a7b25b380a5d359b3e8032583caea7841",
+          "release": "sha256:138511307a7aad3e2742ea86e135437ef2784e8a8e824c1397fbcb0ece423cf3",
+          "status": "sha256:ee98b450969b03a55a6c29621cdeeb88df3f4425ff47cbf769b378dc6e9ada15"
+        },
+        "assumptions": {
+          "cycle": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+        }
+      },
+      "evidence": [
+        {
+          "id": "model",
+          "uri": "file:demo/ltv.sysml",
+          "hash": "sha256:9c3f72a9d4303526cc78caba3bf7256a7b25b380a5d359b3e8032583caea7841",
+          "time": 0,
+          "content": "// Light tactical vehicle powertrain trade: the fielded diesel JLTV against the diesel-electric\n// hybrid eJLTV. Every figure is from a public source, cited on its line by key:\n//   W1  Wikipedia, \"Joint Light Tactical Vehicle\", retrieved 2026-09-25\n//   W2  Wikipedia, \"Humvee replacement process\", retrieved 2026-09-25\n//   O1  Oshkosh Defense, \"JLTV & eJLTV\" product page, retrieved 2026-09-25\n//   O2  Oshkosh Defense, \"Oshkosh Defense unveils first-ever silent drive hybrid electric JLTV\", 2022-01-25\n//   B1  Breaking Defense, \"Oshkosh Defense announces first hybrid electric JLTV\", 2022-01-25\n//   D1  Defense News, \"Oshkosh unveils hybrid electric Joint Light Tactical Vehicle\", 2022-01-25\n//   J1  Janes, \"Oshkosh Defense builds hybrid-electric JLTV demonstrator\", 2022-01-26\n//   C1  CRS RS22942, \"Joint Light Tactical Vehicle (JLTV): Background and Issues for Congress\", 2020-02-18\n//   C2  CRS IF11729, \"Joint Light Tactical Vehicle (JLTV)\", 2025-05-19\n// The evidence items at the end carry each source's URI.\n\npackage LTV {\n    doc /* Powertrain trade for a light tactical vehicle of the JLTV class: keep the fielded\n           diesel, or adopt the diesel-electric hybrid. */\n\n    private import ScalarValues::*;\n    private import ISQ::*;\n    private import SI::*;\n    private import USCustomaryUnits::*;\n\n    // Tags: the graph reads a tag as a kind (demo/ontology.json adds ground-vehicle classes),\n    // a relation, or a validity interval.\n    metadata def Vendor;\n    metadata def Evidence;\n    metadata def Risk;\n    metadata def Decision;\n    metadata def Assumption;\n    metadata def Supplies;\n    metadata def Supports;\n    metadata def Contradicts;\n    metadata def Threatens;\n    metadata def Supersedes;\n    metadata def Validity {\n        attribute since : String;\n        attribute until : String;\n    }\n\n    // Structure.\n\n    port def Shaft {\n        doc /* Mechanical drive: torque out of the powertrain into the axles. */\n    }\n    port def Outlet {\n        doc /* Electrical export power for mission equipment. */\n    }\n\n    interface def Driveline {\n        end port source : Shaft;\n        end port sink : ~Shaft;\n    }\n    interface def Bus {\n        end port source : Outlet;\n        end port sink : ~Outlet;\n    }\n\n    part def Engine;\n    part def Transmission;\n    part def Battery {\n        attribute energy : EnergyValue;\n    }\n    part def Axle {\n        port input : ~Shaft;\n    }\n    part def Equipment {\n        doc /* Mission equipment that draws export power: radios, sensors, command post. */\n        port inlet : ~Outlet;\n    }\n\n    part def Powertrain {\n        doc /* Engine, transmission and any electric drive: moves the vehicle and powers its\n               mission equipment. */\n        port shaft : Shaft;\n        port outlet : Outlet;\n        attribute power : PowerValue;        // rated engine power\n        attribute torque : TorqueValue;      // peak engine torque\n        attribute export : PowerValue;       // export electrical power\n        attribute silent : DurationValue;    // silent drive endurance\n        attribute economy : Real;            // fuel economy gain over the fielded diesel, percent\n    }\n\n    part def Diesel :> Powertrain {\n        doc /* Fielded JLTV powertrain: Gale Banks Engineering 866T V8 turbodiesel, based on the\n               GM Duramax L5P, and an Allison 2500SP automatic (W1). */\n        part engine : Engine {\n            attribute displacement = 6.6 [L];     // W1: 6.6 L Gale Banks Engineering 866T V8\n        }\n        part transmission : Transmission {\n            attribute gears = 6;                  // W1: Allison 2500SP 6-speed automatic\n        }\n        attribute :>> power = 400 [hp];           // W1: 400 hp (298 kW)\n        attribute :>> torque = 850 [lbf*ft];      // W1: 850 lb-ft (1,152 N-m)\n    }\n\n    part def Hybrid :> Powertrain {\n        @Validity { since = \"2022-01-25\"; }       // O2: unveiled 2022-01-25\n        doc /* Diesel-electric hybrid eJLTV: a lithium-ion battery the diesel recharges while\n               driving, for silent drive, silent watch and export power without a towed\n               generator. */\n        part engine : Engine;\n        part battery : Battery {\n            attribute :>> energy = 30 [kW*h];     // O2: battery capacity of 30 kWh\n            attribute life = 10 [yr];             // D1: designed for a minimum of 10 years\n        }\n        attribute :>> export = 115 [kW];          // O2: export power capacity of up to 115 kW\n        attribute :>> silent = 30 [min];          // B1: 30 minutes of silent drive\n        attribute :>> economy = 20;               // O2: fuel economy improved by more than 20%\n        attribute recharge = 30 [min];            // O2: fully recharges the battery within 30 minutes\n        attribute added = 1000 [lb];              // J1: adds more than 1,000 lb to curb weight\n    }\n\n    part def Vehicle {\n        doc /* A light tactical vehicle: the powertrain drives the axles and powers mission\n               equipment. */\n        attribute curb : MassValue;          // curb weight\n        attribute gross : MassValue;         // gross vehicle weight\n        attribute payload : MassValue;\n        attribute range : LengthValue;\n        attribute speed : SpeedValue;\n        attribute mmbomf : LengthValue;      // mean miles between operational mission failure\n        attribute cost : Real;               // unit cost, USD\n        part powertrain : Powertrain;\n        part axles : Axle [2];\n        part equipment : Equipment;\n        interface drive : Driveline connect powertrain.shaft to axles.input;\n        interface feed : Bus connect powertrain.outlet to equipment.inlet;\n    }\n\n    part vehicle : Vehicle {\n        doc /* The fielded four-door JLTV general purpose vehicle: curb and gross vehicle weight\n               (GVW), payload, range, road speed, reliability and unit cost. */\n        part :>> powertrain : Diesel;\n        attribute :>> curb = 14000 [lb];          // W1: curb weight 14,000 lb\n        attribute :>> gross = 22500 [lb];         // W1: gross weight 22,500 lb\n        attribute :>> payload = 3500 [lb];        // O1: 4-door payload 3,500 lb\n        attribute :>> range = 300 [mi];           // W1: range 300 mi\n        attribute :>> speed = 70 [mi/h];          // W1: 70 mph on road\n        attribute :>> mmbomf = 7051 [mi];         // W2: Oshkosh EMD vehicles, 7,051 MMBOMF\n        attribute :>> cost = 370000;              // W1: unit cost $370,000-399,000 (low end)\n    }\n\n    // Requirements.\n\n    requirement <'R1'> payload {\n        doc /* Carry the four-door general purpose payload. */\n        subject vehicle : Vehicle;\n        attribute required = 3500 [lb];           // O1: 4-door payload 3,500 lb\n        require constraint { vehicle.payload >= required }\n    }\n    requirement <'R2'> reliability {\n        doc /* Mean miles between operational mission failure (MMBOMF) at or above the JLTV\n               target. */\n        subject vehicle : Vehicle;\n        attribute required = 2400 [mi];           // W2: the target for JLTV is 2,400 MMBOMF\n        require constraint { vehicle.mmbomf >= required }\n    }\n    requirement <'R3'> range {\n        doc /* Operating range on internal fuel. */\n        subject vehicle : Vehicle;\n        attribute required = 300 [mi];            // W1: range 300 mi\n        require constraint { vehicle.range >= required }\n    }\n    requirement <'R4'> transport {\n        doc /* Air transportable: sling-loaded by CH-47 and CH-53 helicopters, carried by C-130\n               aircraft (O1). */\n        subject vehicle : Vehicle;\n        assume constraint unchanged {\n            doc /* The hybrid keeps the JLTV's dimensions and transportability, as Oshkosh\n                   states (J1). */\n        }\n    }\n    requirement <'R5'> power {\n        doc /* Power mission equipment on board, without a towed generator. */\n        subject vehicle : Vehicle;\n    }\n    requirement <'R6'> stealth {\n        doc /* Silent drive and silent watch: move and hold position on battery with the engine\n               off. */\n        subject vehicle : Vehicle;\n    }\n\n    // The decision and its alternatives.\n\n    #Decision analysis trade {\n        doc /* Choose the powertrain for the light tactical vehicle: keep the fielded diesel or\n               adopt the diesel-electric hybrid. */\n        subject vehicle : Vehicle;\n        part diesel : Diesel;\n        part hybrid : Hybrid;\n    }\n\n    satisfy payload by trade.diesel;\n    satisfy reliability by trade.diesel;\n    satisfy range by trade.diesel;\n    satisfy transport by trade.diesel;\n    satisfy range by trade.hybrid;\n    satisfy transport by trade.hybrid;\n    satisfy power by trade.hybrid;\n    satisfy stealth by trade.hybrid;\n\n    // Verification.\n\n    verification weighing {\n        doc /* Weigh at curb and gross vehicle weight; load to rated payload. */\n        subject vehicle : Vehicle;\n        objective { verify payload; }\n    }\n    verification airlift {\n        doc /* Sling-load certification under CH-47 and CH-53; C-130 load planning. */\n        subject vehicle : Vehicle;\n        objective { verify transport; }\n    }\n    verification durability {\n        doc /* Reliability, availability and maintainability miles: score mission failures to\n               compute MMBOMF; measure range on internal fuel. */\n        subject vehicle : Vehicle;\n        objective {\n            verify reliability;\n            verify range;\n        }\n    }\n    verification bench {\n        doc /* Load-bank export power; silent watch and silent drive on battery with the engine\n               off. */\n        subject vehicle : Vehicle;\n        objective {\n            verify power;\n            verify stealth;\n        }\n    }\n\n    // Vendors.\n\n    #Vendor part oshkosh {\n        doc /* Oshkosh Defense: JLTV producer from the 2015 award (W1); developer of the eJLTV (O2). */\n    }\n    #Vendor part amgeneral {\n        doc /* AM General: JLTV follow-on producer from February 2023 (C2). */\n    }\n    #Vendor part banks {\n        doc /* Gale Banks Engineering: the 866T V8 turbodiesel (W1). */\n    }\n    #Vendor part allison {\n        doc /* Allison Transmission: the 2500SP automatic (W1). */\n    }\n\n    #Supplies dependency from oshkosh to Diesel {\n        @Validity { since = \"2015-08-25\"; until = \"2023-02-09\"; }   // W1: awarded 2015-08-25; C2: follow-on awarded 2023-02-09\n    }\n    #Supplies dependency from oshkosh to Hybrid;\n    #Supplies dependency from amgeneral to Diesel {\n        @Validity { since = \"2023-02-09\"; }                          // C2: follow-on awarded 2023-02-09\n    }\n    #Supplies dependency from banks to Diesel::engine;\n    #Supplies dependency from allison to Diesel::transmission;\n\n    // Risks and assumptions.\n\n    #Risk concern weight {\n        doc /* The hybrid adds more than 1,000 lb of curb weight (J1): at the same gross vehicle\n               weight it costs payload, and it narrows helicopter lift margin. */\n    }\n    #Risk concern maturity {\n        doc /* The eJLTV was a demonstrator with no orders when unveiled (B1). */\n    }\n    #Risk concern procurement {\n        @Validity { since = \"2025-05-01\"; }                          // C2: Army Transformation Initiative letter, 2025-05-01\n        doc /* The Army ended JLTV procurement after its January 2025 tranche (C2). */\n    }\n\n    #Threatens dependency from weight to payload;\n    #Threatens dependency from weight to transport;\n    #Threatens dependency from weight to trade.hybrid;\n    #Threatens dependency from maturity to trade.hybrid;\n    #Threatens dependency from procurement to trade;\n\n    #Assumption constraint cycle {\n        doc /* The fuel economy gain of more than 20% (O2) holds over the Army duty cycle: a\n               company figure, not an Army test result. */\n    }\n    #Supports dependency from cycle to trade.hybrid;\n\n    // Evidence.\n\n    #Evidence item <'W1'> wikipedia {\n        doc /* Wikipedia, \"Joint Light Tactical Vehicle\": engine, power, torque, weights, range,\n               speed, unit cost and contract awards. */\n        attribute uri = \"https://en.wikipedia.org/wiki/Joint_Light_Tactical_Vehicle\";\n    }\n    #Evidence item <'W2'> replacement {\n        doc /* Wikipedia, \"Humvee replacement process\": reliability of the EMD vehicles against\n               the JLTV target, in MMBOMF. */\n        attribute uri = \"https://en.wikipedia.org/wiki/Humvee_replacement_process\";\n    }\n    #Evidence item <'O1'> product {\n        doc /* Oshkosh Defense, \"JLTV & eJLTV\": payload by door count and air transportability. */\n        attribute uri = \"https://oshkoshdefense.com/vehicles/light-tactical-vehicles/jltv/\";\n    }\n    #Evidence item <'O2'> release {\n        @Validity { since = \"2022-01-25\"; }\n        doc /* Oshkosh Defense press release unveiling the eJLTV: battery, recharge, fuel economy\n               and export power. */\n        attribute uri = \"https://oshkoshdefense.com/oshkosh-defense-unveils-first-ever-silent-drive-hybrid-electric-jltv/\";\n    }\n    #Evidence item <'B1'> breaking {\n        @Validity { since = \"2022-01-25\"; }\n        doc /* Breaking Defense on the eJLTV: silent drive endurance; no orders at unveiling. */\n        attribute uri = \"https://breakingdefense.com/2022/01/oshkosh-defense-announces-first-hybrid-electric-jltv/\";\n    }\n    #Evidence item <'D1'> news {\n        @Validity { since = \"2022-01-25\"; }\n        doc /* Defense News on the eJLTV: battery capacity and design life, export power. */\n        attribute uri = \"https://www.defensenews.com/land/2022/01/25/oshkosh-unveils-hybrid-electric-joint-light-tactical-vehicle/\";\n    }\n    #Evidence item <'J1'> janes {\n        @Validity { since = \"2022-01-26\"; }\n        doc /* Janes on the eJLTV demonstrator: added curb weight; dimensions and\n               transportability unchanged. */\n        attribute uri = \"https://www.janes.com/osint-insights/defence-news/land/oshkosh-defense-builds-hybrid-electric-jltv-demonstrator\";\n    }\n    #Evidence item <'C1'> background {\n        @Validity { since = \"2020-02-18\"; }\n        doc /* CRS RS22942, quoting DOT&E's FY2018 report: all JLTVs are not operationally\n               suitable because of deficiencies in reliability, maintainability, training,\n               manuals, crew situational awareness and safety. */\n        attribute uri = \"https://www.everycrsreport.com/files/20200218_RS22942_9231b713562f5293806d3868ef892cbc6c6798c5.html\";\n    }\n    #Evidence item <'C2'> status {\n        @Validity { since = \"2025-05-19\"; }\n        doc /* CRS IF11729: AM General follow-on award; the Army ends JLTV procurement. */\n        attribute uri = \"https://www.everycrsreport.com/files/2025-05-19_IF11729_b3d5f3f3f68c2c1d061e8befe0d0261fe8e4cbd3.html\";\n    }\n\n    #Supports dependency from wikipedia to Diesel;\n    #Supports dependency from wikipedia to vehicle;\n    #Supports dependency from wikipedia to range;\n    #Supports dependency from replacement to reliability;\n    #Supports dependency from replacement to trade.diesel;\n    #Supports dependency from product to payload;\n    #Supports dependency from product to transport;\n    #Supports dependency from release to Hybrid;\n    #Supports dependency from breaking to Hybrid;\n    #Supports dependency from news to Hybrid;\n    #Supports dependency from janes to weight;\n    #Supports dependency from janes to transport::unchanged;\n    #Supports dependency from status to procurement;\n    #Contradicts dependency from background to trade.diesel;\n    #Supersedes dependency from status to background;\n}\n"
+        },
+        {
+          "id": "release",
+          "uri": "https://oshkoshdefense.com/oshkosh-defense-unveils-first-ever-silent-drive-hybrid-electric-jltv/",
+          "hash": "sha256:138511307a7aad3e2742ea86e135437ef2784e8a8e824c1397fbcb0ece423cf3",
+          "time": 0,
+          "content": {
+            "source": "O2",
+            "claim": "fuel economy improved by more than 20%"
+          }
+        },
+        {
+          "id": "status",
+          "uri": "sysml:LTV::Diesel,LTV::Hybrid,LTV::maturity",
+          "hash": "sha256:ee98b450969b03a55a6c29621cdeeb88df3f4425ff47cbf769b378dc6e9ada15",
+          "time": 0,
+          "content": {
+            "diesel": "LTV::Diesel: Fielded JLTV powertrain: Gale Banks Engineering 866T V8 turbodiesel, based on the GM Duramax L5P, and an Allison 2500SP automatic (W1).",
+            "hybrid": "LTV::Hybrid (since 2022-01-25, O2): Diesel-electric hybrid eJLTV. LTV::maturity: The eJLTV was a demonstrator with no orders when unveiled (B1)."
+          }
+        }
+      ],
+      "measurements": {
+        "fuel": {
+          "diesel": 0.0,
+          "hybrid": 20.0
+        },
+        "weight": {
+          "diesel": 0.0,
+          "hybrid": 1000.0
+        },
+        "field": {
+          "diesel": 0.0,
+          "hybrid": 2.0
+        },
+        "proven": {
+          "diesel": 2.0,
+          "hybrid": 0.0
+        },
+        "lift": {
+          "diesel": 1.0,
+          "hybrid": 1.0
+        },
+        "mature": {
+          "diesel": 0.7335357395638623,
+          "hybrid": 0.263858382111862
+        }
+      },
+      "constraints": [
+        {
+          "constraint": "airlift",
+          "option": "diesel",
+          "value": 1.0,
+          "slack": 0.0,
+          "ok": true
+        },
+        {
+          "constraint": "airlift",
+          "option": "hybrid",
+          "value": 1.0,
+          "slack": 0.0,
+          "ok": true
+        }
+      ],
+      "ranking": [
+        {
+          "option": "diesel",
+          "utility": 0.6000000000000001,
+          "loss": -0.0,
+          "parts": {
+            "economy": 0.0,
+            "mass": 0.2,
+            "capability": 0.0,
+            "record": 0.2,
+            "maturity": 0.2
+          }
+        },
+        {
+          "option": "hybrid",
+          "utility": 0.4,
+          "loss": -0.0,
+          "parts": {
+            "economy": 0.2,
+            "mass": 0.0,
+            "capability": 0.2,
+            "record": 0.0,
+            "maturity": 0.0
+          }
+        }
+      ],
+      "selection": "diesel",
+      "verdict": null,
+      "bias": [
+        {
+          "id": "anchoring",
+          "check": "Was the fielded diesel treated as the answer before the options were measured?",
+          "p": 0.3359900331417134
+        }
+      ],
+      "results": {
+        "fuel": {
+          "key": "sha256:b40b5e06dbcd4983fd08f5ff289202fd56c1e6dfc4e0650144ecff9c8ae7b39a",
+          "inputs": "sha256:733db8399bf03574756fc974578772867f8a90d008bd370ec8993cda5191f968",
+          "output": {
+            "diesel": 0.0,
+            "hybrid": 20.0
+          }
+        },
+        "weight": {
+          "key": "sha256:fdf4eb13e99988fbd52f3ed65c49e47451763ff9a245fdc1c6db2741e63d03d9",
+          "inputs": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "output": {
+            "diesel": 0.0,
+            "hybrid": 1000.0
+          }
+        },
+        "field": {
+          "key": "sha256:71bb7d2ffaf666a5b212555e263bed699989b31696b9302085a756c00e935ac8",
+          "inputs": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "output": {
+            "diesel": 0.0,
+            "hybrid": 2.0
+          }
+        },
+        "proven": {
+          "key": "sha256:2287d6908481d12d2073f685b00f4c8866ba9c21744c1d08c379be47cd3a2d17",
+          "inputs": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "output": {
+            "diesel": 2.0,
+            "hybrid": 0.0
+          }
+        },
+        "lift": {
+          "key": "sha256:d18359db4a8ad04ab069d84894abbf3ce910b73742f1b70d8b66cf67b0102a5e",
+          "inputs": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "output": {
+            "diesel": 1.0,
+            "hybrid": 1.0
+          }
+        },
+        "mature": {
+          "key": "sha256:bdc6cbad953cc61c4efaeace82b4b8a4f86d9fa675284f9e753bad3d92c875a0",
+          "inputs": "sha256:a879f5b537d2fad2e896f8e0c80aeef35032c49e62a17f38109f3a755114b206",
+          "output": {
+            "diesel": {
+              "false": 0.2664642604361377,
+              "true": 0.7335357395638623
+            },
+            "hybrid": {
+              "false": 0.7361416178881379,
+              "true": 0.263858382111862
+            }
+          },
+          "revision": {
+            "model": "kai-1.3@0834a74f2d140642a453373da09e5a128e3d2c8d9e8bb1dcaf86d7210a4ecdfc",
+            "calibration": "cal_e23c27a1f768bff7"
+          }
+        },
+        "brief": {
+          "key": "sha256:d34746389a7561ca3d949f7a7ddd856301f936dfa05701c14535a550ced31453",
+          "inputs": "sha256:3ba3e8fb951e91f10a3f95c810550a07848e1574a05be1d489053b3606ca787f",
+          "output": "Diesel: the fielded powertrain, 400 hp and 850 lb-ft (W1); it meets payload (O1) and the 2,400 MMBOMF reliability target (W2). Hybrid: fuel economy better by more than 20% (O2, a company figure), 30 minutes of silent drive (B1), up to 115 kW export power (O2), and more than 1,000 lb of added curb weight (J1); a demonstrator with no orders when unveiled (B1). The Army ended JLTV procurement after its January 2025 tranche (C2).",
+          "revision": {
+            "model": "zen@example"
+          }
+        },
+        "anchor": {
+          "key": "sha256:82c3ea97641f60e8d5e8576a411f2f4c4393911fd91ab034fa6d1562a35df793",
+          "inputs": "sha256:00d4f07b7b8967c845a8e9dbd39717c9197a4179ebcc4f652185c3793c49cba4",
+          "output": {
+            "false": 0.6640099668582866,
+            "true": 0.3359900331417134
+          },
+          "revision": {
+            "model": "kai-1.3@0834a74f2d140642a453373da09e5a128e3d2c8d9e8bb1dcaf86d7210a4ecdfc",
+            "calibration": "cal_e23c27a1f768bff7"
+          }
+        },
+        "approve": {
+          "key": "sha256:270351d2d7d69a5a1b730a36f4db5c03a47ac549a8e167534d608836c40c6400",
+          "inputs": "sha256:5f1784623429ce394a64ed2418bdcc8901f84e3f6be2fb919d6364b8df30fea4",
+          "output": {
+            "approved": false,
+            "by": "program manager",
+            "time": 0,
+            "note": "Hold: the fuel gain is a company figure (O2); ask for duty-cycle data."
+          }
+        }
+      },
+      "sensitivity": [
+        {
+          "param": "weight",
+          "target": "economy",
+          "value": 0.2,
+          "segments": [
+            {
+              "from": 0.0,
+              "to": 0.4000000000000001,
+              "top": "diesel"
+            },
+            {
+              "from": 0.4000000000000001,
+              "to": null,
+              "top": "hybrid"
+            }
+          ],
+          "exact": true
+        },
+        {
+          "param": "weight",
+          "target": "mass",
+          "value": 0.2,
+          "segments": [
+            {
+              "from": 0.0,
+              "to": null,
+              "top": "diesel"
+            }
+          ],
+          "exact": true
+        },
+        {
+          "param": "weight",
+          "target": "capability",
+          "value": 0.2,
+          "segments": [
+            {
+              "from": 0.0,
+              "to": 0.4000000000000001,
+              "top": "diesel"
+            },
+            {
+              "from": 0.4000000000000001,
+              "to": null,
+              "top": "hybrid"
+            }
+          ],
+          "exact": true
+        },
+        {
+          "param": "weight",
+          "target": "record",
+          "value": 0.2,
+          "segments": [
+            {
+              "from": 0.0,
+              "to": null,
+              "top": "diesel"
+            }
+          ],
+          "exact": true
+        },
+        {
+          "param": "weight",
+          "target": "maturity",
+          "value": 0.2,
+          "segments": [
+            {
+              "from": 0.0,
+              "to": null,
+              "top": "diesel"
+            }
+          ],
+          "exact": true
+        },
+        {
+          "param": "assumption",
+          "target": "cycle",
+          "value": 1.0,
+          "segments": [
+            {
+              "from": 0.0,
+              "to": 1.0,
+              "top": "diesel"
+            }
+          ],
+          "exact": false,
+          "held": [
+            "approve"
+          ]
+        },
+        {
+          "param": "bound",
+          "target": "airlift",
+          "value": 1.0,
+          "segments": [
+            {
+              "from": null,
+              "to": 1.0,
+              "top": "diesel"
+            },
+            {
+              "from": 1.0,
+              "to": null,
+              "top": null
+            }
+          ],
+          "exact": true
+        }
+      ],
+      "flips": [
+        {
+          "param": "weight",
+          "target": "economy",
+          "from": 0.2,
+          "at": 0.4000000000000001,
+          "top": "hybrid",
+          "exact": true
+        },
+        {
+          "param": "weight",
+          "target": "capability",
+          "from": 0.2,
+          "at": 0.4000000000000001,
+          "top": "hybrid",
+          "exact": true
+        },
+        {
+          "param": "bound",
+          "target": "airlift",
+          "from": 1.0,
+          "at": 1.0,
+          "top": null,
+          "exact": true
+        }
+      ],
+      "overrides": [],
+      "approvals": {
+        "approve": {
+          "approved": false,
+          "by": "program manager",
+          "time": 0,
+          "note": "Hold: the fuel gain is a company figure (O2); ask for duty-cycle data."
+        }
+      },
+      "revisions": {
+        "kai/kai": {
+          "model": "kai-1.3@0834a74f2d140642a453373da09e5a128e3d2c8d9e8bb1dcaf86d7210a4ecdfc",
+          "calibration": "cal_e23c27a1f768bff7"
+        },
+        "zen": {
+          "model": "zen@example"
+        }
+      },
+      "replay": {
+        "keys": {
+          "fuel": "sha256:b40b5e06dbcd4983fd08f5ff289202fd56c1e6dfc4e0650144ecff9c8ae7b39a",
+          "weight": "sha256:fdf4eb13e99988fbd52f3ed65c49e47451763ff9a245fdc1c6db2741e63d03d9",
+          "field": "sha256:71bb7d2ffaf666a5b212555e263bed699989b31696b9302085a756c00e935ac8",
+          "proven": "sha256:2287d6908481d12d2073f685b00f4c8866ba9c21744c1d08c379be47cd3a2d17",
+          "lift": "sha256:d18359db4a8ad04ab069d84894abbf3ce910b73742f1b70d8b66cf67b0102a5e",
+          "mature": "sha256:bdc6cbad953cc61c4efaeace82b4b8a4f86d9fa675284f9e753bad3d92c875a0",
+          "brief": "sha256:d34746389a7561ca3d949f7a7ddd856301f936dfa05701c14535a550ced31453",
+          "anchor": "sha256:82c3ea97641f60e8d5e8576a411f2f4c4393911fd91ab034fa6d1562a35df793",
+          "approve": "sha256:270351d2d7d69a5a1b730a36f4db5c03a47ac549a8e167534d608836c40c6400"
+        },
+        "recorded": [
+          "brief",
+          "approve"
+        ]
+      },
+      "trace": [
+        {
+          "node": "fuel",
+          "key": "sha256:b40b5e06dbcd4983fd08f5ff289202fd56c1e6dfc4e0650144ecff9c8ae7b39a",
+          "inputs": "sha256:733db8399bf03574756fc974578772867f8a90d008bd370ec8993cda5191f968",
+          "output": "sha256:321eb6fea06e98e63318948091bc93906e56983732ce0dbad73927aac6b80c59",
+          "ms": 0.01592,
+          "source": "run"
+        },
+        {
+          "node": "weight",
+          "key": "sha256:fdf4eb13e99988fbd52f3ed65c49e47451763ff9a245fdc1c6db2741e63d03d9",
+          "inputs": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "output": "sha256:cf6514b0425f6ff8234d72158fa620f98a4521a3a037d4a13d7f5a92101fb3ca",
+          "ms": 0.006,
+          "source": "run"
+        },
+        {
+          "node": "field",
+          "key": "sha256:71bb7d2ffaf666a5b212555e263bed699989b31696b9302085a756c00e935ac8",
+          "inputs": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "output": "sha256:7980785546d65466be3fcf7827862dca300c8311138a4ce91e925d01d2985f00",
+          "ms": 0.006,
+          "source": "run"
+        },
+        {
+          "node": "proven",
+          "key": "sha256:2287d6908481d12d2073f685b00f4c8866ba9c21744c1d08c379be47cd3a2d17",
+          "inputs": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "output": "sha256:19b6acbcd2938cd72c929ba1da9d1bea21d212e583f8b9139c1c2b28ac28274a",
+          "ms": 0.006912,
+          "source": "run"
+        },
+        {
+          "node": "lift",
+          "key": "sha256:d18359db4a8ad04ab069d84894abbf3ce910b73742f1b70d8b66cf67b0102a5e",
+          "inputs": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "output": "sha256:462da3b04edc63dc7da5805b4dd6d9015754272c6f92c1a1bda3f6f39c0dd99c",
+          "ms": 0.005888,
+          "source": "run"
+        },
+        {
+          "node": "mature",
+          "key": "sha256:bdc6cbad953cc61c4efaeace82b4b8a4f86d9fa675284f9e753bad3d92c875a0",
+          "inputs": "sha256:a879f5b537d2fad2e896f8e0c80aeef35032c49e62a17f38109f3a755114b206",
+          "output": "sha256:de8b29ff356387e41d3b6acf0d71c36a56512841666fb278868dfc53f4495663",
+          "revision": {
+            "model": "kai-1.3@0834a74f2d140642a453373da09e5a128e3d2c8d9e8bb1dcaf86d7210a4ecdfc",
+            "calibration": "cal_e23c27a1f768bff7"
+          },
+          "ms": 379.357106,
+          "source": "run"
+        },
+        {
+          "node": "brief",
+          "key": "sha256:d34746389a7561ca3d949f7a7ddd856301f936dfa05701c14535a550ced31453",
+          "inputs": "sha256:3ba3e8fb951e91f10a3f95c810550a07848e1574a05be1d489053b3606ca787f",
+          "output": "sha256:1a4fcaa8001df3692895b539de0bcd42f35dcd323ee13212ce6e7de6f4a8f05f",
+          "revision": {
+            "model": "zen@example"
+          },
+          "ms": 0.115457,
+          "source": "run"
+        },
+        {
+          "node": "anchor",
+          "key": "sha256:82c3ea97641f60e8d5e8576a411f2f4c4393911fd91ab034fa6d1562a35df793",
+          "inputs": "sha256:00d4f07b7b8967c845a8e9dbd39717c9197a4179ebcc4f652185c3793c49cba4",
+          "output": "sha256:5b63fe0d7566f85196d59cfa5ec39b0335146d15aab522ef7eefcbd6ff728ea2",
+          "revision": {
+            "model": "kai-1.3@0834a74f2d140642a453373da09e5a128e3d2c8d9e8bb1dcaf86d7210a4ecdfc",
+            "calibration": "cal_e23c27a1f768bff7"
+          },
+          "ms": 136.613521,
+          "source": "run"
+        },
+        {
+          "node": "approve",
+          "key": "sha256:270351d2d7d69a5a1b730a36f4db5c03a47ac549a8e167534d608836c40c6400",
+          "inputs": "sha256:5f1784623429ce394a64ed2418bdcc8901f84e3f6be2fb919d6364b8df30fea4",
+          "output": "sha256:25c52ee065979efed5e326a72a0cd1d2c9f58e05908546233f37de02c6e42953",
+          "ms": 0.026944000000000003,
+          "source": "run"
+        }
+      ],
+      "hash": "sha256:b88d3d4ed2dd69294b5c1109fc9bbb7d293b1d276bd0f7054ce396ba5bfaeb0d"
+    }
+  }
+]
