@@ -68,15 +68,15 @@ cargo run -p examples -- apu file https://api.hanzo.ai examples/apu/changes/bull
 
 | Record | Route | What `apu` files |
 |---|---|---|
-| Evidence | `POST /v1/evidence` | the five uris the program reads, each with its content and SHA-256: version 1 |
+| Evidence | `POST /v1/research/evidence` | the five uris the program reads, each with its content and SHA-256: version 1 |
 | Decision | `POST /v1/research/decisions` | `ddt.json` as written, `charter.json`, program `apu.select@1` and its hash |
 | Evaluation | `POST /v1/research/evaluations` | the DDT Evaluation Run, the Decision Package, the recommendation (selection, ranking, break-evens, readiness), each uri with the hash it read |
 | Action | `POST /v1/research/actions` | a draft for each gate that asks or denies; none when the gate allows |
-| Evidence | `POST /v1/evidence` | bulletin TSB-22 rev B: `techdata://sph/tsb/22` version 2 |
-| Dependents | `GET /v1/evidence/dependents` | the decision DEC-SPH-0412, which names the uri, and the evaluation, which read version 1: stale |
+| Evidence | `POST /v1/research/evidence` | bulletin TSB-22 rev B: `techdata://sph/tsb/22` version 2 |
+| Dependents | `GET /v1/research/evidence/dependents` | the decision DEC-SPH-0412, which names the uri, and the evaluation, which read version 1: stale |
 
 `jltv file` files its evidence: `ltv.sysml` as one model record and every element of it as
-`sysml://ltv@<sha256 of the source>#<element id>` (`POST /v1/evidence/sysml`), ids stable across
-runs, each `satisfy` and `verify` a `satisfies` or `verifies` link. It has no DDT record, so it
-files no decision. Nothing files a Commitment or authorizes an Action: a person does, through
-the server.
+`sysml://ltv@<sha256 of the source>#<element id>` (`POST /v1/research/evidence/sysml`), ids
+stable across runs, each `satisfy` and `verify` a `satisfies` or `verifies` link. It has no DDT
+record, so it files no decision. Nothing files a Commitment or authorizes an Action: a person
+does, through the server.
