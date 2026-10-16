@@ -1,0 +1,12 @@
+{
+  "question": "Which auxiliary power source does the vehicle concept carry: an integrated APU, a battery-only pack or a trailer genset?",
+  "scope": "Auxiliary power for a representative ground vehicle concept, at the concept gate.",
+  "owner": "Chief Engineer",
+  "criteria": [
+    "OBJ_SILENT_WATCH: at least 8 h of silent watch at 3.5 kW and 49 C ambient",
+    "OBJ_SUSTAINMENT_BURDEN: field-maintenance hours per 1,000 operating hours",
+    "OBJ_COST: unit cost",
+    "OBJ_MASS: mass added or towed",
+    "Before the gate, every option has a completed thermal qualification run and a reliability review of its current technical data"
+  ]
+}
