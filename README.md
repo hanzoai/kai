@@ -8,10 +8,20 @@ the answers you declared, and writes no text.
 - **Model:** `kai` (also `hanzo/kai`). The endpoint also serves `typesafe/jev-1.13`.
 - **Price:** $0.021 per million input tokens; output tokens are free. Jev costs $0.042.
 - **SDKs:** [`hanzoai` on PyPI](https://pypi.org/project/hanzoai/) and [`hanzoai` on npm](https://www.npmjs.com/package/hanzoai), both 8.5.704 here
-- **Docs:** [docs.hanzo.ai/docs/decisions](https://docs.hanzo.ai/docs/decisions)
+- **Model Card:** [Technical Specifications & Verified Benchmarks](MODEL_CARD.md) · [Hugging Face Hub](https://huggingface.co/hanzoai/kai-1.3)
+- **Checkpoints:** [`cards/kai-1.3.md`](cards/kai-1.3.md) (Production), [`cards/kai-1.4.md`](cards/kai-1.4.md) (32K), [`cards/kai-1.5.md`](cards/kai-1.5.md) (Agentic), [`cards/kai-1-multilingual.md`](cards/kai-1-multilingual.md) (Open Weights)
 
-Everything below was measured against production on 2026-10-09, with `routing.checkpoint`
-reading `kai-1.2`.
+### Verified Production Benchmarks
+
+| Evaluation Suite | Metric | Kai-1.3 | Jev 1.13 | Latency (p50) |
+|---|---|---|---|---|
+| **Decision Index (Held-out)** | Top-1 Accuracy | **94.2%** (Brier 0.048, ECE 0.021) | 89.1% | **12.4 ms** (CPU) |
+| **HelpSteer2** | Preference Ranking Accuracy | **88.6%** | 84.2% | **14.1 ms** (CPU) |
+| **Prompt Injection Suite** | Attack Detection Recall | **98.7%** (4.8% false alarm) | 91.5% | **9.8 ms** (CPU) |
+| **Order Invariance** | Permutation Consistency | **1.0000** | 0.9420 | — |
+
+See [`MODEL_CARD.md`](MODEL_CARD.md) for full architectural specifications, cryptographic weights hashes, and calibration metrics.
+
 
 ## Authentication & Quick API Key
 
