@@ -1,0 +1,4 @@
+{
+  "recommended_powertrain": ["clean_diesel", "electric_hybrid"],
+  "trade_confidence": [1, 2, 3]
+}

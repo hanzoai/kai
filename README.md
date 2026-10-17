@@ -13,10 +13,30 @@ the answers you declared, and writes no text.
 Everything below was measured against production on 2026-10-09, with `routing.checkpoint`
 reading `kai-1.2`.
 
-## Army demonstrations
+## Authentication & Quick API Key
 
-[`army/`](army/): two ground-vehicle decisions run as programs with Kai answering live, a SysML v2
-trade (`army/jltv`) and a DDT readiness gate with refresh (`army/apu`), with every recorded output.
+All endpoints require a Bearer token:
+
+```bash
+# Option 1: Automatic login via Hanzo CLI
+curl -fsSL https://hanzo.sh | sh
+hanzo auth login
+export HANZO_API_KEY="$(hanzo auth token)"
+
+# Option 2: Generate via Web Console
+# Visit https://platform.hanzo.ai/keys and create an API key
+export HANZO_API_KEY="sk_live_..."
+```
+
+## Production Recipes
+
+[`recipes/`](recipes/): 20 production-grade decision patterns across agent workflows, support triage, commerce, security, and industrial fleet operations:
+
+- **Agentic Workflows**: Preflight (`01`), Tool Shortlist (`02`), Command Risk (`03`), Progress Evaluation (`04`), Completion Check (`05`)
+- **Customer Support**: Ticket Department Triage (`06`), Churn Risk (`07`)
+- **Sales & Merchandising**: Lead Qualification (`08`), Next Best Action (`09`), Product Recommendation (`10`), Next-Best Offer (`11`)
+- **Content & Security**: Content Moderation (`12`), Code Review Gate (`13`), Feature Flag Routing (`14`), Security Threat Scoring (`15`), Incident Severity Triage (`16`), RAG Retrieval Router (`17`), Structured Data Validation (`18`)
+- **Industrial Systems**: Fleet Powertrain Trade Study ([`recipes/19_fleet_powertrain_trade`](recipes/19_fleet_powertrain_trade)), Equipment Readiness Gate ([`recipes/20_equipment_readiness_gate`](recipes/20_equipment_readiness_gate))
 
 ## Questions and answers
 

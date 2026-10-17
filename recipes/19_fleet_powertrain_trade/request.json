@@ -1,0 +1,44 @@
+{
+  "model": "kai",
+  "state": {
+    "fleet_type": "commercial_light_transport",
+    "operating_environment": "mixed_urban_and_highway",
+    "annual_mileage_target": 45000,
+    "payload_capacity_kg": 2400,
+    "options": {
+      "clean_diesel": {
+        "capital_cost_usd": 68000,
+        "operating_cost_per_km": 0.42,
+        "payload_penalty_kg": 0,
+        "fuel_economy_l_per_100km": 14.2,
+        "production_status": "fielded_and_mature"
+      },
+      "electric_hybrid": {
+        "capital_cost_usd": 89000,
+        "operating_cost_per_km": 0.28,
+        "payload_penalty_kg": 210,
+        "fuel_economy_l_per_100km": 7.4,
+        "production_status": "in_volume_production"
+      }
+    }
+  },
+  "questions": {
+    "recommended_powertrain": {
+      "type": "choice",
+      "instructions": "Select the optimal powertrain option under total cost of ownership and emissions targets",
+      "criteria": {
+        "clean_diesel": "lowest initial acquisition cost, maximum payload, conventional infrastructure",
+        "electric_hybrid": "lower lifecycle operating cost, significant fuel reduction, reduced urban emissions"
+      }
+    },
+    "trade_confidence": {
+      "type": "score",
+      "instructions": "Rate the analytical confidence in the trade study recommendation",
+      "criteria": ["low", "moderate", "high", "conclusive"]
+    },
+    "requires_duty_cycle_audit": {
+      "type": "noul",
+      "instructions": "Does the recommendation depend heavily on real-world route duty cycle assumptions?"
+    }
+  }
+}

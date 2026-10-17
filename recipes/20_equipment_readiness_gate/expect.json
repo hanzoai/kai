@@ -1,0 +1,4 @@
+{
+  "operational_verdict": ["allow", "conditional", "deny"],
+  "fault_severity": [1, 2, 3]
+}
