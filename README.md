@@ -7,7 +7,7 @@ the answers you declared, and writes no text.
 - **Endpoint:** `POST https://api.hanzo.ai/v1/decisions`
 - **Model:** `kai` (also `hanzo/kai`). The endpoint also serves `typesafe/jev-1.13`.
 - **Price:** $0.021 per million input tokens; output tokens are free. Jev costs $0.042.
-- **SDKs:** [`hanzoai` on PyPI](https://pypi.org/project/hanzoai/) and [`hanzoai` on npm](https://www.npmjs.com/package/hanzoai), both 8.5.704 here
+- **SDKs:** [`hanzoai` on PyPI](https://pypi.org/project/hanzoai/) and [`hanzoai` on npm](https://www.npmjs.com/package/hanzoai), both 8.5.704 here; [`Hanzo` on NuGet](https://www.nuget.org/packages/Hanzo) ([hanzo-csharp/sdk](https://github.com/hanzo-csharp/sdk)) and [`ai.hanzo:hanzo-java-cloud`](https://central.sonatype.com/artifact/ai.hanzo/hanzo-java-cloud) ([hanzo-java/sdk](https://github.com/hanzo-java/sdk)), both 8.5.1026
 - **Model Card:** [Technical Specifications & Verified Benchmarks](MODEL_CARD.md) · [Hugging Face Hub](https://huggingface.co/hanzoai/kai-1.3)
 - **Checkpoints:** [`cards/kai-1.3.md`](cards/kai-1.3.md) (Production), [`cards/kai-1.4.md`](cards/kai-1.4.md) (32K), [`cards/kai-1.5.md`](cards/kai-1.5.md) (Agentic), [`cards/kai-1-multilingual.md`](cards/kai-1-multilingual.md) (Open Weights)
 
@@ -347,15 +347,44 @@ for Kai on 127.0.0.1, with no network and no key; `test.sh` runs it too.
 - Technical support: [dev@hanzo.ai](mailto:dev@hanzo.ai)
 - Status: [status.hanzo.ai](https://status.hanzo.ai)
 
-## C# (plain HTTP)
+## C# and Java
 
-Requires the .NET SDK.
+Both call `POST /v1/decisions` through their SDK — [`examples/csharp`](./examples/csharp/Program.cs)
+on [`Hanzo`](https://github.com/hanzo-csharp/sdk), [`examples/java`](./examples/java/src/main/java/kai/Kai.java)
+on [`ai.hanzo:hanzo-java-cloud`](https://github.com/hanzo-java/sdk) — and ask for the
+strongest opening move in tic-tac-toe as a choice over the nine squares.
 
 ```bash
-cd /Users/z/work/hanzo/kai
-dotnet build examples/csharp/Kai.csproj --configuration Release
-HANZO_API_KEY=... KAI_MODEL=kai \
-  dotnet run --project examples/csharp/Kai.csproj --configuration Release
+# .NET 8 or newer
+HANZO_API_KEY=... dotnet run --project examples/csharp/Kai.csproj --configuration Release
+
+# Java 11 or newer, Maven
+HANZO_API_KEY=... mvn -q -f examples/java/pom.xml compile exec:java
+```
+
+```csharp
+var ai = new AiApi(Gateway.Configuration());   // HANZO_API_KEY, HANZO_BASE_URL, HANZO_ORG_ID
+var decision = ai.PostDecisions(new AiDecisionsRequest(
+    model: "kai",
+    state: new { game = "tic-tac-toe", player = "X" },
+    questions: new Dictionary<string, AiDecisionsQuestion>
+    {
+        ["move"] = new AiDecisionsQuestion(new AiDecisionsChoice(
+            type: AiDecisionsChoice.TypeEnum.Choice,
+            criteria: new Dictionary<string, string> { ["r2c2"] = "center", ["r1c1"] = "corner" })),
+    }));
+Console.WriteLine(decision.Answers["move"].Choice);
+```
+
+```java
+AiApi ai = new AiApi(Hanzo.client());          // HANZO_API_KEY, HANZO_BASE_URL, HANZO_ORG_ID
+AiDecisionsResponse decision = ai.postDecisions(new AiDecisionsRequest()
+        .model("kai")
+        .state(Map.of("game", "tic-tac-toe", "player", "X"))
+        .putQuestionsItem("move", new AiDecisionsQuestion(new AiDecisionsChoice()
+                .type(AiDecisionsChoice.TypeEnum.CHOICE)
+                .criteria(Map.of("r2c2", "center", "r1c1", "corner")))));
+System.out.println(decision.getAnswers().get("move").getChoice());
 ```
 
 ## VBScript (Windows Script Host)

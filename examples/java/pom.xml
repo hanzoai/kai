@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- One Kai decision through the Hanzo Java SDK, github.com/hanzo-java/sdk.
+     Run: HANZO_API_KEY=... mvn -q compile exec:java -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>ai.hanzo.kai</groupId>
+  <artifactId>kai-example</artifactId>
+  <version>1</version>
+
+  <properties>
+    <maven.compiler.release>11</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>ai.hanzo</groupId>
+      <artifactId>hanzo-java-cloud</artifactId>
+      <version>8.5.1026</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <configuration>
+          <mainClass>kai.Kai</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

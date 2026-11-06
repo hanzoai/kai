@@ -48,6 +48,14 @@ else
   echo "csharp: skipped (.NET SDK not found)"
 fi
 
+# Java is optional: run it when Maven is installed.
+if command -v mvn >/dev/null 2>&1; then
+  check examples/java mvn -q -f examples/java/pom.xml compile exec:java
+  count java
+else
+  echo "java: skipped (Maven not found)"
+fi
+
 # Godot is optional and its offline test needs no key.
 if command -v godot >/dev/null 2>&1; then
   check examples/godot godot --headless --path examples/godot --script tests/test_duel.gd
