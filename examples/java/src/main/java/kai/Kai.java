@@ -1,13 +1,13 @@
 package kai;
 
 import ai.hanzo.Hanzo;
-import ai.hanzo.cloud.ApiException;
-import ai.hanzo.cloud.api.AiApi;
-import ai.hanzo.cloud.model.AiDecisionsAnswer;
-import ai.hanzo.cloud.model.AiDecisionsChoice;
-import ai.hanzo.cloud.model.AiDecisionsQuestion;
-import ai.hanzo.cloud.model.AiDecisionsRequest;
-import ai.hanzo.cloud.model.AiDecisionsResponse;
+import ai.hanzo.ApiException;
+import ai.hanzo.api.AiApi;
+import ai.hanzo.model.AiDecisionsAnswer;
+import ai.hanzo.model.AiDecisionsChoice;
+import ai.hanzo.model.AiDecisionsQuestion;
+import ai.hanzo.model.AiDecisionsRequest;
+import ai.hanzo.model.AiDecisionsResponse;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
