@@ -346,3 +346,45 @@ for Kai on 127.0.0.1, with no network and no key; `test.sh` runs it too.
 - Maintained by Hanzo AI Inc.
 - Technical support: [dev@hanzo.ai](mailto:dev@hanzo.ai)
 - Status: [status.hanzo.ai](https://status.hanzo.ai)
+
+## C# (plain HTTP)
+
+Requires the .NET SDK.
+
+```bash
+cd /Users/z/work/hanzo/kai
+dotnet build examples/csharp/Kai.csproj --configuration Release
+HANZO_API_KEY=... KAI_MODEL=kai \
+  dotnet run --project examples/csharp/Kai.csproj --configuration Release
+```
+
+## VBScript (Windows Script Host)
+
+Windows only. No build step.
+
+```bat
+cd C:\path\to\kai
+set HANZO_API_KEY=...
+set KAI_MODEL=kai
+cscript //nologo examples\vbscript\choice.vbs
+```
+
+## Godot 4 (Kai Duel)
+
+Requires Godot 4.2 or newer, ordinary (non-.NET) edition.
+
+Offline rules and parser tests:
+
+```bash
+cd /Users/z/work/hanzo/kai
+godot --headless --path examples/godot --script tests/test_duel.gd
+```
+
+Live local game:
+
+```bash
+cd /Users/z/work/hanzo/kai
+HANZO_API_KEY=... KAI_MODEL=kai godot --path examples/godot
+```
+
+Loopback mode uses `HANZO_BASE_URL=http://127.0.0.1:8080` and a local Kai checkpoint; see `examples/godot/README.md`.

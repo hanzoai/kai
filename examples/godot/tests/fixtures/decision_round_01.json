@@ -1,0 +1,17 @@
+{
+  "answers": {
+    "p1_move": {
+      "type": "choice",
+      "choice": "strike",
+      "probabilities": {"strike": 0.72, "guard": 0.12, "charge": 0.10, "recover": 0.06},
+      "confidence": 0.81
+    },
+    "p2_move": {
+      "type": "choice",
+      "choice": "guard",
+      "probabilities": {"strike": 0.20, "guard": 0.55, "charge": 0.15, "recover": 0.10},
+      "confidence": 0.73
+    }
+  },
+  "latency_ms": 42
+}

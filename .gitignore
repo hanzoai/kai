@@ -8,3 +8,11 @@ node_modules/
 dist/
 target/
 Cargo.lock
+
+# C# example
+examples/csharp/bin/
+examples/csharp/obj/
+
+# Godot example
+examples/godot/.godot/
+examples/godot/.import/

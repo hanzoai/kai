@@ -35,5 +35,28 @@ count rust
 check examples/claude-code node --test examples/claude-code/test/kai.test.mjs
 count claude-code
 
+# C# is optional: build it when .NET is installed; run it only with a key.
+if command -v dotnet >/dev/null 2>&1; then
+  if dotnet build examples/csharp/Kai.csproj --configuration Release >/tmp/kai-csharp-build.log 2>&1; then
+    check examples/csharp dotnet run --project examples/csharp/Kai.csproj --configuration Release
+    count csharp
+  else
+    echo "FAIL examples/csharp (build)"; cat /tmp/kai-csharp-build.log | sed 's/^/    /'
+    fail=$((fail + 1)); count csharp
+  fi
+else
+  echo "csharp: skipped (.NET SDK not found)"
+fi
+
+# Godot is optional and its offline test needs no key.
+if command -v godot >/dev/null 2>&1; then
+  check examples/godot godot --headless --path examples/godot --script tests/test_duel.gd
+  count godot
+else
+  echo "godot: skipped (Godot not found)"
+fi
+
+echo "vbscript: skipped on this host (requires Windows Script Host)"
+
 printf '\n%s' "$summary"
 [ "$failed" -eq 0 ]

@@ -57,7 +57,12 @@ Facts below were measured against production on 2026-10-09 (`routing.checkpoint`
   uses reqwest with rustls.
 
 ## Layout
-- `examples/{curl,python,typescript,go,rust}`: one call each; they pass when they answer.
+- `examples/{curl,python,typescript,go,rust,csharp}`: one call each; they pass when they answer.
+- `examples/vbscript/choice.vbs`: one call through Windows Script Host; Windows-only, no build step.
+- `examples/godot/`: a Kai Duel. `scripts/duel.gd` holds only rules, `scripts/kai_client.gd`
+  only HTTP and response validation, `scripts/main.gd` only UI and round flow. One request
+  carries both `p1_move` and `p2_move`. Offline rule and JSON tests run with
+  `godot --headless --path examples/godot --script tests/test_duel.gd`.
 - `recipes/NN_name/`: `request.json` (the call), `expect.json` (checked answers: a list of
   acceptable options for choice, of level indices for score, a boolean for noul; a question
   absent from it has no obvious answer and is printed only), `run.py`, `run.ts` (identical
