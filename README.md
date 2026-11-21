@@ -1,5 +1,7 @@
 # Kai Cookbook
 
+[![Open in Hanzo](https://hanzo.app/badges/open-in-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/kai&ref=main&action=open) [![Edit with Hanzo](https://hanzo.app/badges/edit-with-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/kai&ref=main&action=edit) [![Deploy with Hanzo](https://hanzo.app/badges/deploy-with-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/kai&ref=main&action=deploy)
+
 Kai is Hanzo AI's decision model. You send a state (text, an object or an
 array) and typed questions; Kai answers each question with probabilities over
 the answers you declared, and writes no text.
